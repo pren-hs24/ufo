@@ -51,6 +51,8 @@ class DijkstraPathfinder(BasePathfinder):
             path.append(predecessors[istart][path[-1]])
 
         node_path = [nodes[i] for i in reversed(path)]
-        self._logger.debug("path to %s (%s): %s", end, dist_matrix[istart][iend], node_path)
+        self._logger.debug(
+            "path to %s (%s): %s", end, dist_matrix[istart][iend], node_path
+        )
 
         return node_path

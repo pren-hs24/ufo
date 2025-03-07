@@ -24,6 +24,7 @@ def test_unmodified() -> None:
     assert path[2].label == NodeLabel.Y
     assert path[3].label == NodeLabel.B
 
+
 def test_disabled_node() -> None:
     """
     Test the Dijkstra pathfinder with node X disabled
@@ -39,6 +40,7 @@ def test_disabled_node() -> None:
     assert path[1].label == NodeLabel.Z
     assert path[2].label == NodeLabel.Y
     assert path[3].label == NodeLabel.B
+
 
 def test_disabled_edge() -> None:
     """
@@ -56,6 +58,7 @@ def test_disabled_edge() -> None:
     assert path[2].label == NodeLabel.A
     assert path[3].label == NodeLabel.B
 
+
 def test_obstructed_edge() -> None:
     """
     Test the Dijkstra pathfinder with edge X -> Y disabled and edge X -> A obstructed
@@ -67,11 +70,12 @@ def test_obstructed_edge() -> None:
     network.get_edge_by_label(NodeLabel.X, NodeLabel.Y).disabled = True
     network.get_edge_by_label(NodeLabel.X, NodeLabel.A).obstructed = True
     path = pathfinder.find_path(network, b)
-    
+
     assert path[0].label == NodeLabel.START
     assert path[1].label == NodeLabel.Z
     assert path[2].label == NodeLabel.Y
     assert path[3].label == NodeLabel.B
+
 
 def test_complex() -> None:
     """
