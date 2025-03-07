@@ -30,7 +30,7 @@ This document defines the UART communication protocol for controlling and monito
 0x01 [angle (int16)] [snap (uint8)] [checksum]
 ```
 
-- **angle**: Rotation angle in degrees (-180 to 180)
+- **angle**: Rotation angle in degrees (-180 (left) to 180 (right))
 - **snap**: 0 = No snap, 1 = Snap to angle
 
 ### 0x02 - Follow Line
