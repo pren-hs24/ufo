@@ -1,0 +1,24 @@
+# -*- coding: utf-8 -*-
+"""Pathfinder interface module"""
+
+__copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
+
+from abc import ABC
+import logging
+
+from network.node import Node
+from network.network import Network
+from .ipathfinder import IPathfinder
+
+
+class BasePathfinder(IPathfinder, ABC):
+    """Pathfinder interface"""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+    def _validate(self, network: Network, end: Node) -> None:
+        """Validate the network and end node"""
+        if end not in network.end:
+            raise ValueError("End node not found")
