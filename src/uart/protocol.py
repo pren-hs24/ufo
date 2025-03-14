@@ -13,6 +13,7 @@ class UARTCommand(Enum):
 
     TURN = 0x01
     FOLLOW_LINE = 0x02
+    DESTINAITON_REACHED = 0x03
     SET_DEBUG_LOGGING = 0x04
     SET_SPEED = 0x05
 

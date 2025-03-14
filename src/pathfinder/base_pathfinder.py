@@ -18,7 +18,9 @@ class BasePathfinder(IPathfinder, ABC):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
 
-    def _validate(self, network: Network, end: Node) -> None:
+    def _validate(self, network: Network, start: Node, end: Node) -> None:
         """Validate the network and end node"""
+        if start not in network.nodes:
+            raise ValueError("Start node not found")
         if end not in network.end:
             raise ValueError("End node not found")

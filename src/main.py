@@ -11,8 +11,11 @@ from argparse import ArgumentParser, Namespace
 import uvloop
 
 from common.application import log_configuration
+from common.competition import create_network
 from uart.bus import UARTBus
 from uart.sender import UARTSender
+from uart.receiver import UARTReceiver
+from ufo.engine import Engine
 
 
 def _get_args(logger: logging.Logger) -> Namespace:
@@ -25,9 +28,25 @@ def _get_args(logger: logging.Logger) -> Namespace:
     parser.add_argument(
         "--baudrate", type=int, default=115200, help="UART bus baudrate"
     )
+    parser.add_argument(
+        "--demo", action="store_true", default=False, help="Run the demo mode"
+    )
     args = parser.parse_args()
     logger.debug("args: %s", args)
     return args
+
+
+async def demo(args: Namespace) -> None:
+    """Main async function."""
+    reader, writer = await asyncio.open_connection(args.bus, args.baudrate)
+    uart = UARTBus(reader, writer)
+    sender = UARTSender(uart)
+
+    await sender.set_debug_logging(args.debug)
+    await sender.turn(90)
+    await sender.set_speed(50)
+    await asyncio.sleep(1)
+    await sender.set_speed(0)
 
 
 async def async_main(args: Namespace) -> None:
@@ -35,12 +54,12 @@ async def async_main(args: Namespace) -> None:
     reader, writer = await asyncio.open_connection(args.bus, args.baudrate)
     uart = UARTBus(reader, writer)
     sender = UARTSender(uart)
-    # receiver = UARTReceiver(uart)
+    receiver = UARTReceiver(uart)
 
-    await sender.set_debug_logging(args.debug)
-    await sender.turn(90)
-    await sender.set_speed(50)
-    await sender.set_speed(0)
+    Engine(sender, receiver, create_network)
+
+    loop = asyncio.get_running_loop()
+    loop.run_forever()
 
 
 def main() -> None:
@@ -52,7 +71,10 @@ def main() -> None:
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    asyncio.run(async_main(args))
+    if args.demo:
+        asyncio.run(demo(args))
+    else:
+        asyncio.run(async_main(args))
 
     logger.info("[main] exit")
     logging.shutdown()

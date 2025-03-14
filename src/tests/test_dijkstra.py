@@ -15,9 +15,9 @@ def test_unmodified() -> None:
     """
     network = create_network()
     pathfinder = DijkstraPathfinder()
-    b = next(x for x in network.end if x.label == NodeLabel.B)
+    b = network.get_node_by_label(NodeLabel.B)
 
-    path = pathfinder.find_path(network, b)
+    path = pathfinder.find_path(network, network.start, b)
 
     assert path[0].label == NodeLabel.START
     assert path[1].label == NodeLabel.X
@@ -31,10 +31,10 @@ def test_disabled_node() -> None:
     """
     network = create_network()
     pathfinder = DijkstraPathfinder()
-    b = next(x for x in network.end if x.label == NodeLabel.B)
+    b = network.get_node_by_label(NodeLabel.B)
 
     network.get_node_by_label(NodeLabel.X).disabled = True
-    path = pathfinder.find_path(network, b)
+    path = pathfinder.find_path(network, network.start, b)
 
     assert path[0].label == NodeLabel.START
     assert path[1].label == NodeLabel.Z
@@ -48,10 +48,10 @@ def test_disabled_edge() -> None:
     """
     network = create_network()
     pathfinder = DijkstraPathfinder()
-    b = next(x for x in network.end if x.label == NodeLabel.B)
+    b = network.get_node_by_label(NodeLabel.B)
 
     network.get_edge_by_label(NodeLabel.X, NodeLabel.Y).disabled = True
-    path = pathfinder.find_path(network, b)
+    path = pathfinder.find_path(network, network.start, b)
 
     assert path[0].label == NodeLabel.START
     assert path[1].label == NodeLabel.X
@@ -65,11 +65,11 @@ def test_obstructed_edge() -> None:
     """
     network = create_network()
     pathfinder = DijkstraPathfinder()
-    b = next(x for x in network.end if x.label == NodeLabel.B)
+    b = network.get_node_by_label(NodeLabel.B)
 
     network.get_edge_by_label(NodeLabel.X, NodeLabel.Y).disabled = True
     network.get_edge_by_label(NodeLabel.X, NodeLabel.A).obstructed = True
-    path = pathfinder.find_path(network, b)
+    path = pathfinder.find_path(network, network.start, b)
 
     assert path[0].label == NodeLabel.START
     assert path[1].label == NodeLabel.Z
@@ -83,12 +83,12 @@ def test_complex() -> None:
     """
     network = create_network()
     pathfinder = DijkstraPathfinder()
-    b = next(x for x in network.end if x.label == NodeLabel.B)
+    b = network.get_node_by_label(NodeLabel.B)
 
     network.get_edge_by_label(NodeLabel.X, NodeLabel.Y).disabled = True
     network.get_edge_by_label(NodeLabel.X, NodeLabel.A).obstructed = True
     network.get_node_by_label(NodeLabel.Z).disabled = True
-    path = pathfinder.find_path(network, b)
+    path = pathfinder.find_path(network, network.start, b)
 
     assert path[0].label == NodeLabel.START
     assert path[1].label == NodeLabel.W

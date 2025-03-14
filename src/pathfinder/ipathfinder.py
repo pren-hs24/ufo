@@ -13,12 +13,13 @@ class IPathfinder(ABC):
     """Pathfinder interface"""
 
     @abstractmethod
-    def find_path(self, network: Network, end: Node) -> list[Node]:
+    def find_path(self, network: Network, start: Node, end: Node) -> list[Node]:
         """
-        Find a path in the network from (implicit) START
+        Find a path in the network from the specified start node
         to the specified end node
 
         :param network: The network to search in
+        :param start: The start node to search from
         :param end: The end node to search for
-        :return: The path from START to end
+        :return: The path from start to end
         """

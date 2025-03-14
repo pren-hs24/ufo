@@ -60,3 +60,7 @@ class UARTSender:
             speed,
         )
         await self._sender.send_command(UARTCommand.SET_SPEED, payload)
+
+    async def destination_reached(self) -> None:
+        """signalise that the destination was reached"""
+        await self._sender.send_command(UARTCommand.DESTINAITON_REACHED)

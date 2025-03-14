@@ -35,14 +35,14 @@ class DijkstraPathfinder(BasePathfinder):
 
         return matrix
 
-    def find_path(self, network: Network, end: Node) -> list[Node]:
-        self._validate(network, end)
+    def find_path(self, network: Network, start: Node, end: Node) -> list[Node]:
+        self._validate(network, start, end)
 
         nodes = list(network.nodes)
-        istart = nodes.index(network.start)
+        istart = nodes.index(start)
         iend = nodes.index(end)
 
-        adj_matrix = self._create_adjacency_matrix(network, (network.start, end))
+        adj_matrix = self._create_adjacency_matrix(network, (start, end))
         dist_matrix, predecessors = dijkstra(
             csr_array(adj_matrix), directed=False, return_predecessors=True
         )

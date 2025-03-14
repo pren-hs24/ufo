@@ -11,14 +11,14 @@ from network.network import Network
 
 def create_network() -> Network:
     """Create a network for the competition"""
-    start = Node(NodeType.START, NodeLabel.START, x=0, y=0)
-    w = Node(NodeType.NORMAL, NodeLabel.W, x=2, y=1)
-    x = Node(NodeType.NORMAL, NodeLabel.X, x=0.5, y=1)
-    y = Node(NodeType.NORMAL, NodeLabel.Y, x=0, y=2.5)
-    z = Node(NodeType.NORMAL, NodeLabel.Z, x=-2, y=1)
-    a = Node(NodeType.END, NodeLabel.A, x=2, y=4)
-    b = Node(NodeType.END, NodeLabel.B, x=0, y=5)
-    c = Node(NodeType.END, NodeLabel.C, x=-2, y=4)
+    start = Node(x=0, y=0, label=NodeLabel.START, node_type=NodeType.START)
+    w = Node(x=2, y=1, label=NodeLabel.W)
+    x = Node(x=0.5, y=1, label=NodeLabel.X)
+    y = Node(x=0, y=2.5, label=NodeLabel.Y)
+    z = Node(x=-2, y=1, label=NodeLabel.Z)
+    a = Node(x=2, y=4, label=NodeLabel.A, node_type=NodeType.END)
+    b = Node(x=0, y=5, label=NodeLabel.B, node_type=NodeType.END)
+    c = Node(x=-2, y=4, label=NodeLabel.C, node_type=NodeType.END)
 
     network = Network()
 

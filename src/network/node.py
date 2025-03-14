@@ -27,15 +27,17 @@ class NodeLabel(StrEnum):
     B = "B"
     C = "C"
 
+    UNDEFINED = "<UNDEFINED>"
+
 
 @dataclass
 class Node:
     """Node of a graph"""
 
-    node_type: NodeType
-    label: NodeLabel
     x: float
     y: float
+    label: NodeLabel = NodeLabel.UNDEFINED
+    node_type: NodeType = NodeType.NORMAL
     disabled: bool = False
     visited: bool = False
 
