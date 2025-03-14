@@ -23,7 +23,7 @@ def _get_args(logger: logging.Logger) -> Namespace:
     parser = ArgumentParser(description="PREN project FS25 HSLU Team 2")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
     parser.add_argument(
-        "--bus", type=str, default="/dev/ttyUSB0", help="UART bus device"
+        "--bus", type=str, default="/dev/serial0", help="UART bus device"
     )
     parser.add_argument(
         "--baudrate", type=int, default=115200, help="UART bus baudrate"
