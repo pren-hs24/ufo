@@ -1,0 +1,4 @@
+services:
+  ufo:
+    build:
+      context: .
