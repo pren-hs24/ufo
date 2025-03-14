@@ -160,7 +160,7 @@ This document defines the UART communication protocol for controlling and monito
 **Format**:
 
 ```
-0x17 [message (string)] [checksum]
+0x17 [length (uint8)] [message (string)] [checksum]
 ```
 
 ---
