@@ -1,0 +1,10 @@
+[project]
+name = "UFO"
+version = "0.1.0"
+description = "Source Code for the UFO"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "scipy==1.15.2",
+    "uvloop==0.21.0",
+]
