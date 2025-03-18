@@ -9,6 +9,7 @@ import asyncio
 from argparse import ArgumentParser, Namespace
 
 import uvloop
+from serial_asyncio import open_serial_connection  # type: ignore
 
 from common.application import log_configuration
 from common.competition import create_network
@@ -36,9 +37,10 @@ def _get_args(logger: logging.Logger) -> Namespace:
     return args
 
 
-async def demo(args: Namespace) -> None:
+async def demo(args: Namespace, logger: logging.Logger) -> None:
     """Main async function."""
-    reader, writer = await asyncio.open_connection(args.bus, args.baudrate)
+    reader, writer = await open_serial_connection(url=args.bus, baudrate=args.baudrate)
+    logger.debug("connected to %s with baudrate %d", args.bus, args.baudrate)
     uart = UARTBus(reader, writer)
     sender = UARTSender(uart)
 
@@ -49,17 +51,19 @@ async def demo(args: Namespace) -> None:
     await sender.set_speed(0)
 
 
-async def async_main(args: Namespace) -> None:
+async def async_main(args: Namespace, logger: logging.Logger) -> None:
     """Main async function."""
-    reader, writer = await asyncio.open_connection(args.bus, args.baudrate)
+    reader, writer = await open_serial_connection(url=args.bus, baudrate=args.baudrate)
+    logger.debug("connected to %s with baudrate %d", args.bus, args.baudrate)
     uart = UARTBus(reader, writer)
     sender = UARTSender(uart)
     receiver = UARTReceiver(uart)
 
     Engine(sender, receiver, create_network)
+    logging.info("Engine created")
 
-    loop = asyncio.get_running_loop()
-    loop.run_forever()
+    while True:
+        await asyncio.sleep(1)
 
 
 def main() -> None:
@@ -72,9 +76,9 @@ def main() -> None:
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
     if args.demo:
-        asyncio.run(demo(args))
+        asyncio.run(demo(args, logger))
     else:
-        asyncio.run(async_main(args))
+        asyncio.run(async_main(args, logger))
 
     logger.info("[main] exit")
     logging.shutdown()
