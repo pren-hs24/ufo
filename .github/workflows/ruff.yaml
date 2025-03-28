@@ -5,12 +5,12 @@ on:
         types:
             - opened
         paths:
-            - "src/**.py"
+            - "src/ufo-real/**.py"
     push:
         paths:
-            - "src/**.py"
+            - "src/ufo-real/**.py"
             - requirements.txt
-            - github/workflows/ruff.yaml
+            - .github/workflows/ruff.yaml
     workflow_dispatch:
 
 jobs:
