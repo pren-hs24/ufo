@@ -1,5 +1,5 @@
 cd src
-python3 -m ruff format
-python3 -m ruff check --fix
-python3 -m mypy . --strict
-python3 -m pylint *.py */ --recursive=y --rcfile=../.pylintrc
+uv run ruff format
+uv run ruff check --fix
+uv run mypy . --strict
+uv run pylint *.py */ --recursive=y --rcfile=../.pylintrc
