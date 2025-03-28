@@ -9,7 +9,7 @@ from typing import Any
 import json
 
 from aiohttp import web
-from pyaddict.schema import ISchemaType
+from pyaddict.schema.base import ISchemaType
 
 from ufo.engine import Engine
 
