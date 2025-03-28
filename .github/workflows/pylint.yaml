@@ -27,6 +27,6 @@ jobs:
                   python -m pip install --upgrade pip
                   pip install -r requirements.txt pylint
             - name: Run pylint
-              working-directory: ./src
+              working-directory: ./src/ufo-real
               run: |
                   python3 -m pylint *.py */ --rcfile=../.pylintrc --recursive=y

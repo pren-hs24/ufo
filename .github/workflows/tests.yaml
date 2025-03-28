@@ -27,6 +27,6 @@ jobs:
                   python -m pip install --upgrade pip
                   pip install -r requirements.txt pytest
             - name: Run pytest
-              working-directory: ./src
+              working-directory: ./src/ufo-real
               run: |
                   python3 -m pytest
