@@ -13,6 +13,7 @@ from ufo.engine import Engine
 from .handlers.base_handler import BaseHandler
 from .handlers.command import CommandHandler
 from .handlers.monitoring import MonitoringHandler
+from .handlers.system import SystemHandler
 
 
 class WebServer:
@@ -27,6 +28,7 @@ class WebServer:
         self._handlers: list[BaseHandler] = [
             CommandHandler(engine),
             MonitoringHandler(engine),
+            SystemHandler(engine),
         ]
 
         for handler in self._handlers:

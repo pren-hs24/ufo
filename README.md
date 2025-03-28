@@ -1,5 +1,8 @@
 # UFO
 
+- **[UFO-Real](/src/ufo-real/)**: The real deal, the UFO itself.
+- **[UFO-Sure](/src/ufo-sure/)**: The dashboard (UI), to ensure and test the UFO.
+
 ## Quickstart
 
 ### With Docker
@@ -9,7 +12,7 @@ docker compose up
 
 ### With Python 3.13
 ```sh
-cd src
+cd src/ufo
 uv run main.py
 ```
 

@@ -1,0 +1,146 @@
+@import "./base.css";
+
+a {
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: inherit;
+}
+a:hover {
+    color: var(--accent-dk);
+}
+
+body {
+    margin: 0;
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+h1 {
+    font-size: 3.2em;
+    line-height: 1.1;
+    font-family: "Space Grotesk", "Rethink Sans", system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+aside {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+#app {
+    display: grid;
+    gap: 1em;
+    width: 100svw;
+    height: 100svh;
+}
+
+button,
+input,
+select {
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    accent-color: var(--accent);
+
+    &:hover {
+        border-color: var(--accent);
+    }
+
+    &:focus,
+    &:focus-visible {
+        outline: 4px auto -webkit-focus-ring-color;
+    }
+
+    &.primary {
+        background-color: var(--accent);
+        color: white;
+
+        &:hover {
+            background-color: var(--accent-dk);
+            border-color: var(--accent-dk);
+        }
+    }
+
+    &:disabled {
+        background-color: var(--bg-mute);
+        color: var(--border);
+        cursor: not-allowed;
+
+        &:hover {
+            background-color: var(--border);
+            border-color: var(--border);
+        }
+    }
+}
+
+input,
+button,
+select,
+.card {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    border-color: var(--border);
+    background-color: var(--bg);
+
+    .heading {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        gap: 0.5em;
+        align-items: center;
+
+        & h4 {
+            margin: 0;
+        }
+    }
+
+    .card {
+        background-color: var(--bg-mute);
+    }
+}
+
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    padding: 1em;
+    justify-content: flex-start;
+    align-items: start;
+
+    & button {
+        width: 100%;
+    }
+
+    & p {
+        margin-top: 0;
+    }
+}
+
+.playground {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.mathing {
+    & h1 {
+        margin-bottom: 0;
+    }
+}
+
+.muted {
+    color: var(--fg-mute);
+}
+
+.standout {
+    font-weight: 900;
+    color: var(--fg);
+    font-size: 1.5rem;
+}
+
+.clickable {
+    cursor: pointer;
+}
