@@ -15,6 +15,7 @@ from serial_asyncio import open_serial_connection  # type: ignore
 
 from common.application import log_configuration
 from common.competition import create_network
+from uart.protocol import UARTProtocol
 from uart.bus import UARTBus
 from uart.mock.log_bus import LogUARTBus
 from ufo.engine import Engine
@@ -40,16 +41,18 @@ def _get_args(logger: logging.Logger) -> Namespace:
     return args
 
 
-async def create_and_start_bus(args: Namespace, logger: logging.Logger) -> None:
+async def create_and_start_bus(args: Namespace, logger: logging.Logger) -> UARTProtocol:
     """create bus"""
+    bus: UARTProtocol
     if args.demo:
         logger.info("demo mode")
         bus = LogUARTBus()
-        await bus.start()
-        return bus
-    reader, writer = await open_serial_connection(url=args.bus, baudrate=args.baudrate)
-    logger.debug("connected to %s with baudrate %d", args.bus, args.baudrate)
-    bus = UARTBus(reader, writer)
+    else:
+        reader, writer = await open_serial_connection(
+            url=args.bus, baudrate=args.baudrate
+        )
+        logger.debug("connected to %s with baudrate %d", args.bus, args.baudrate)
+        bus = UARTBus(reader, writer)
     await bus.start()
     return bus
 
@@ -82,7 +85,7 @@ def _on_startup(
         if args.demo:
             logger.info("demo mode")
             await demo(engine, args, logger)
-        
+
         logger.info("web mode")
         await init_web(engine, args, logger)
 

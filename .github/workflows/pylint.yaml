@@ -29,4 +29,4 @@ jobs:
             - name: Run pylint
               working-directory: ./src/ufo-real
               run: |
-                  python3 -m pylint *.py */ --rcfile=../.pylintrc --recursive=y
+                  python3 -m pylint *.py */ --rcfile=../../.pylintrc --recursive=y
