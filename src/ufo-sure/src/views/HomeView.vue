@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
 import { useSystemStore } from "@/stores/system";
 
 const systemStore = useSystemStore();
