@@ -1,3 +1,5 @@
 uvloop==0.21.0
 scipy==1.15.2
 pyserial-asyncio==0.6
+aiohttp==3.11.14
+pyaddict>=1.2.0.post1

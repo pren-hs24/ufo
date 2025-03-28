@@ -7,16 +7,17 @@ import logging
 import logging.config
 import asyncio
 from argparse import ArgumentParser, Namespace
+from typing import Awaitable, Callable
 
 import uvloop
+from aiohttp import web
 from serial_asyncio import open_serial_connection  # type: ignore
 
 from common.application import log_configuration
 from common.competition import create_network
 from uart.bus import UARTBus
-from uart.sender import UARTSender
-from uart.receiver import UARTReceiver
 from ufo.engine import Engine
+from web.server import WebServer
 
 
 def _get_args(logger: logging.Logger) -> Namespace:
@@ -29,6 +30,7 @@ def _get_args(logger: logging.Logger) -> Namespace:
     parser.add_argument(
         "--baudrate", type=int, default=115200, help="UART bus baudrate"
     )
+    parser.add_argument("--port", type=int, default=8080, help="Debug web server port")
     parser.add_argument(
         "--demo", action="store_true", default=False, help="Run the demo mode"
     )
@@ -37,12 +39,23 @@ def _get_args(logger: logging.Logger) -> Namespace:
     return args
 
 
-async def demo(args: Namespace, logger: logging.Logger) -> None:
+async def init_web(engine: Engine, args: Namespace, logger: logging.Logger) -> None:
     """Main async function."""
     reader, writer = await open_serial_connection(url=args.bus, baudrate=args.baudrate)
     logger.debug("connected to %s with baudrate %d", args.bus, args.baudrate)
     uart = UARTBus(reader, writer)
-    sender = UARTSender(uart)
+    await uart.start()
+    engine.init(uart)
+
+
+async def demo(engine: Engine, args: Namespace, logger: logging.Logger) -> None:
+    """Main async function."""
+    reader, writer = await open_serial_connection(url=args.bus, baudrate=args.baudrate)
+    logger.debug("connected to %s with baudrate %d", args.bus, args.baudrate)
+    uart = UARTBus(reader, writer)
+    await uart.start()
+    engine.init(uart)
+    sender = engine.sender
 
     await sender.set_debug_logging(args.debug)
     await sender.turn(90)
@@ -51,19 +64,20 @@ async def demo(args: Namespace, logger: logging.Logger) -> None:
     await sender.set_speed(0)
 
 
-async def async_main(args: Namespace, logger: logging.Logger) -> None:
-    """Main async function."""
-    reader, writer = await open_serial_connection(url=args.bus, baudrate=args.baudrate)
-    logger.debug("connected to %s with baudrate %d", args.bus, args.baudrate)
-    uart = UARTBus(reader, writer)
-    sender = UARTSender(uart)
-    receiver = UARTReceiver(uart)
+def _on_startup(
+    engine: Engine, args: Namespace, logger: logging.Logger
+) -> Callable[[web.Application], Awaitable[None]]:
+    async def _impl(_: web.Application) -> None:
+        """Startup handler."""
 
-    Engine(sender, receiver, create_network)
-    logging.info("Engine created")
+        if args.demo:
+            logger.info("demo mode")
+            await demo(engine, args, logger)
+        else:
+            logger.info("web mode")
+            await init_web(engine, args, logger)
 
-    while True:
-        await asyncio.sleep(1)
+    return _impl
 
 
 def main() -> None:
@@ -75,10 +89,10 @@ def main() -> None:
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    if args.demo:
-        asyncio.run(demo(args, logger))
-    else:
-        asyncio.run(async_main(args, logger))
+    engine = Engine(create_network)
+    server = WebServer(engine)
+    server.on_startup.append(_on_startup(engine, args, logger))
+    server.run(args.port)
 
     logger.info("[main] exit")
     logging.shutdown()
