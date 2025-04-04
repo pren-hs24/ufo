@@ -20,6 +20,7 @@
     --accent: #535bf2;
     --accent-dk: #030b92;
     --primary: inherit;
+    --blue: var(--accent);
     --green: #00bd7e;
     --green-dk: #005a39;
     --yellow: #c7aa19;

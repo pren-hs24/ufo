@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSystemStore } from "@/stores/system";
+import Logger from "@/components/Logger.vue";
 
 const systemStore = useSystemStore();
 </script>
@@ -11,6 +12,7 @@ const systemStore = useSystemStore();
             {{ systemStore.uiVersion }} | {{ systemStore.apiVersion }}
         </div>
     </main>
+    <Logger />
 </template>
 
 <style scoped>
