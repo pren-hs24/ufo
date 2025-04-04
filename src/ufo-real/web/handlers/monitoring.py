@@ -3,6 +3,9 @@
 
 __copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
 
+import json
+
+import aiohttp
 from aiohttp import web
 
 from ufo.engine import Engine
@@ -24,14 +27,28 @@ class MonitoringHandler(BaseHandler):
         app.router.add_get("/api/monitoring", self._on_subscribe)
 
     async def _on_message(self, message: UfoLogMessage) -> None:
+        new_listeners: list[web.WebSocketResponse] = []
         for listener in self._listeners:
-            await listener.send_str(str(message))
+            try:
+                await listener.send_str(
+                    json.dumps({"type": "log", "data": message.json()})
+                )
+                new_listeners.append(listener)
+            except aiohttp.ClientConnectionResetError:
+                self._logger.debug("Client disconnected")
+        self._listeners = new_listeners
 
     async def _on_subscribe(self, request: web.Request) -> web.WebSocketResponse:
         ws = web.WebSocketResponse()
         await ws.prepare(request)
         self._logger.debug("New monitoring client connected")
         for event in self._ufo_logger.events:
-            await ws.send_str(str(event))
+            await ws.send_str(json.dumps({"type": "log", "data": event.json()}))
         self._listeners.append(ws)
+
+        async for msg in ws:
+            if msg.type == aiohttp.WSMsgType.TEXT:
+                if msg.data == "close":
+                    await ws.close()
+
         return ws

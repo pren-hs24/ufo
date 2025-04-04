@@ -7,7 +7,7 @@ import logging
 import logging.config
 import asyncio
 from argparse import ArgumentParser, Namespace
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, cast
 
 import uvloop
 from aiohttp import web
@@ -17,7 +17,7 @@ from common.application import log_configuration
 from common.competition import create_network
 from uart.protocol import UARTProtocol
 from uart.bus import UARTBus
-from uart.mock.log_bus import LogUARTBus
+from uart.mock.bus import UARTBus as MockUARTBus
 from ufo.engine import Engine
 from web.server import WebServer
 
@@ -46,7 +46,7 @@ async def create_and_start_bus(args: Namespace, logger: logging.Logger) -> UARTP
     bus: UARTProtocol
     if args.demo:
         logger.info("demo mode")
-        bus = LogUARTBus()
+        bus = MockUARTBus()
     else:
         reader, writer = await open_serial_connection(
             url=args.bus, baudrate=args.baudrate
@@ -68,12 +68,20 @@ async def demo(engine: Engine, args: Namespace, logger: logging.Logger) -> None:
     uart = await create_and_start_bus(args, logger)
     engine.init(uart)
     sender = engine.sender
+    bus = cast(MockUARTBus, engine.receiver.bus)
 
     await sender.set_debug_logging(args.debug)
     await sender.turn(90)
     await sender.set_speed(50)
     await asyncio.sleep(1)
     await sender.set_speed(0)
+
+    async def _implement_random_messages() -> None:
+        while True:
+            await bus.mock_receive_message(b"\x10\x00\x10")
+            await asyncio.sleep(10)
+
+    asyncio.create_task(_implement_random_messages())
 
 
 def _on_startup(
