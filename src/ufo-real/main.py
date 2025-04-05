@@ -76,10 +76,20 @@ async def demo(engine: Engine, args: Namespace, logger: logging.Logger) -> None:
     await asyncio.sleep(1)
     await sender.set_speed(0)
 
+    events = [
+        b"\x10\x00\x10",  # TARGET A
+        b"\x11\x11",  # REACHED
+        b"\x15\x00\x15",  # ALIGNED
+        b"\x14\x14",  # OBSTACLE DETECTED
+    ]
+
+    await bus.mock_receive_message(events[0])
+
     async def _implement_random_messages() -> None:
         while True:
-            await bus.mock_receive_message(b"\x10\x00\x10")
-            await asyncio.sleep(10)
+            for event in events:
+                await bus.mock_receive_message(event)
+                await asyncio.sleep(10)
 
     asyncio.create_task(_implement_random_messages())
 

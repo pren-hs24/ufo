@@ -14,6 +14,7 @@ from .handlers.base_handler import BaseHandler
 from .handlers.command import CommandHandler
 from .handlers.monitoring import MonitoringHandler
 from .handlers.system import SystemHandler
+from .handlers.ui import UiHandler
 
 
 class WebServer:
@@ -29,6 +30,7 @@ class WebServer:
             CommandHandler(engine),
             MonitoringHandler(engine),
             SystemHandler(engine),
+            UiHandler(engine),
         ]
 
         for handler in self._handlers:
