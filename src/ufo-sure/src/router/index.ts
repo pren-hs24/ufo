@@ -9,9 +9,14 @@ const router = createRouter({
             component: () => import("../views/HomeView.vue"),
         },
         {
-            path: "/about",
-            name: "about",
-            component: () => import("../views/HomeView.vue"),
+            path: "/script",
+            name: "script-runner",
+            component: () => import("../views/ScriptRunnerView.vue"),
+        },
+        {
+            path: "/logger",
+            name: "logger",
+            component: () => import("../views/LoggerView.vue"),
         },
     ],
 });

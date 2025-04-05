@@ -70,6 +70,7 @@ onMounted(() => {
     grid-template-columns: 18ch 7ch 1fr;
     gap: 1ch;
     font-size: 1rem;
+    margin: 0.25em;
 
     .level {
         &.INFO {
@@ -90,8 +91,5 @@ onMounted(() => {
 .logger {
     display: flex;
     flex-direction: column-reverse;
-    padding: 1em;
-    background: var(--bg);
-    border: 1px solid var(--border);
 }
 </style>

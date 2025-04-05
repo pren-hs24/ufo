@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import { ref } from "vue";
 import { VueDraggableNext as draggable } from "vue-draggable-next";
 
 type CommandExecution = (params: Record<string, any>) => Promise<void>;
@@ -27,21 +27,7 @@ interface IStep {
 
 const stepsAndCommands = ref<(IStep | ICommand)[]>([]);
 const steps = ref<IStep[]>([]);
-
-/*watch(stepsAndCommands.value, (newStepsAndCommands) => {
-    // convert all ICommand to IStep
-    steps.value = newStepsAndCommands.map((stepOrCommand) => {
-        if ("execute" in stepOrCommand) {
-            // This is an ICommand
-            return {
-                command: stepOrCommand as ICommand,
-                parameters: {},
-            };
-        } else {
-            return stepOrCommand as IStep;
-        }
-    });
-});*/
+const running = ref(false);
 
 interface IOnChanged {
     added?: { element: ICommand; newIndex: number };
@@ -50,12 +36,6 @@ interface IOnChanged {
 }
 
 const onChanged = ({ added, removed, moved }: IOnChanged) => {
-    console.log(
-        "onChanged",
-        { added, removed, moved },
-        stepsAndCommands.value.map((x) => x.name ?? x.command.name),
-    );
-
     if (added) {
         const command = added.element;
         steps.value.splice(added.newIndex, 0, {
@@ -68,6 +48,8 @@ const onChanged = ({ added, removed, moved }: IOnChanged) => {
         const items = steps.value.splice(moved.oldIndex, 1);
         steps.value.splice(moved.newIndex, 0, ...items);
     }
+
+    stepsAndCommands.value = [...steps.value];
 };
 
 const commands: ICommand[] = [
@@ -80,7 +62,7 @@ const commands: ICommand[] = [
                 name: "speed",
                 type: "number",
                 required: true,
-                description: "Speed in km/h",
+                description: "Speed in %",
                 min: -100,
                 max: 100,
             },
@@ -91,23 +73,6 @@ const commands: ICommand[] = [
                 method: "POST",
                 body: JSON.stringify({ speed: params.speed }),
             });
-        },
-    },
-    {
-        name: "Wait",
-        icon: "fa-solid fa-clock",
-        description: "Wait for a specified duration",
-        parameters: [
-            {
-                name: "duration",
-                type: "number",
-                required: true,
-                description: "Duration in seconds",
-            },
-        ],
-        execute: async (params: Record<string, any>) => {
-            console.log(`Waiting for ${params.duration} seconds`);
-            return new Promise((resolve) => setTimeout(resolve, params.duration * 1000));
         },
     },
     {
@@ -182,21 +147,40 @@ const commands: ICommand[] = [
             });
         },
     },
+    {
+        name: "Wait",
+        icon: "fa-solid fa-clock",
+        description: "Wait for a specified duration",
+        parameters: [
+            {
+                name: "duration",
+                type: "number",
+                required: true,
+                description: "Duration in milliseconds",
+            },
+        ],
+        execute: async (params: Record<string, any>) => {
+            console.log(`Waiting for ${params.duration} seconds`);
+            return new Promise((resolve) => setTimeout(resolve, params.duration));
+        },
+    },
 ];
-
-const addStep = (command: ICommand) => {
-    steps.value.push({ command, parameters: {} });
-};
 
 const removeStep = (index: number) => {
     steps.value.splice(index, 1);
 };
 
-const executeSteps = async () => {
+const runScript = async () => {
+    if (running.value) return;
+
+    running.value = true;
     for (const step of steps.value) {
         await step.command.execute(step.parameters);
     }
+    running.value = false;
 };
+
+const paramId = ({ name }: { name: string }) => `param-${name}`;
 </script>
 <template>
     <div class="editor">
@@ -213,28 +197,47 @@ const executeSteps = async () => {
                     :key="index"
                     class="step"
                 >
-                    <h3><i :class="step.command.icon"></i> {{ step.command.name }}</h3>
-                    <p class="description">{{ step.command.description }}</p>
-                    <button
-                        @click="removeStep(index)"
-                        class="remove"
-                    >
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                    <div
-                        v-for="(param, paramIndex) in step.command.parameters"
-                        :key="paramIndex"
-                        :title="param.description"
-                        class="parameter"
-                    >
-                        <label>{{ param.name }} ({{ param.type }})</label>
-                        <input
-                            v-model="step.parameters[param.name]"
-                            :type="param.type"
-                            :required="param.required"
-                            :min="param.min"
-                            :max="param.max"
-                        />
+                    <div class="heading">
+                        <h3><i :class="step.command.icon"></i> {{ step.command.name }}</h3>
+                        <p class="description">{{ step.command.description }}</p>
+                        <button
+                            @click="removeStep(index)"
+                            class="remove"
+                        >
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                    <h4 v-if="step.command.parameters.length">Parameters</h4>
+                    <div class="parameters">
+                        <div
+                            v-for="(param, paramIndex) in step.command.parameters"
+                            :key="paramIndex"
+                            :title="param.description"
+                            class="parameter"
+                            :class="'type-' + param.type"
+                        >
+                            <div class="label-and-description">
+                                <label :for="paramId(param)"
+                                    >{{ param.name }} ({{ param.type }})</label
+                                >
+                                <span class="description">{{ param.description }}</span>
+                            </div>
+                            <input
+                                v-if="param.type == 'boolean'"
+                                type="checkbox"
+                                :id="paramId(param)"
+                                :checked="step.parameters[param.name]"
+                            />
+                            <input
+                                v-else
+                                v-model="step.parameters[param.name]"
+                                :type="param.type"
+                                :required="param.required"
+                                :min="param.min"
+                                :max="param.max"
+                                :id="paramId(param)"
+                            />
+                        </div>
                     </div>
                 </div>
             </draggable>
@@ -264,7 +267,8 @@ const executeSteps = async () => {
         <button
             id="execute"
             class="primary"
-            @click="executeSteps"
+            :disabled="running"
+            @click="runScript"
         >
             Execute Steps
         </button>
@@ -276,25 +280,48 @@ const executeSteps = async () => {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1em;
-    padding: 1em;
-    background-color: var(--bg);
-    border-radius: 0.5em;
-    border: 1px solid var(--border);
     font-family: "Space Grotesk", monospace;
+}
+
+.label-and-description {
+    width: 100%;
+    display: flex;
+    overflow: clip;
+    flex-direction: row;
+    gap: 0.5em;
+    align-items: first baseline;
+
+    &.description {
+        color: var(--fg-mute);
+    }
 }
 
 #execute {
     grid-column: span 2;
     font-weight: 900;
+
+    &:disabled {
+        cursor: progress;
+    }
 }
 
 .h-full {
     height: 100%;
 }
 
+h4 {
+    text-transform: uppercase;
+    letter-spacing: 0.1ch;
+    font-size: 0.8rem;
+}
+
+.step .heading {
+    margin-bottom: 1em;
+}
+
 .step,
 .command {
-    background-color: var(--bg-mute);
+    background-color: var(--bg);
     border-radius: 0.25em;
     padding: 1em;
     border: 1px solid var(--border);
@@ -304,6 +331,7 @@ const executeSteps = async () => {
     flex-direction: column;
 
     & h3,
+    h4,
     p {
         margin: 0;
     }
@@ -325,7 +353,7 @@ const executeSteps = async () => {
 
     .description {
         font-size: 0.8em;
-        color: var(--text-mute);
+        color: var(--fg-mute);
         font-style: italic;
     }
 }
@@ -336,13 +364,28 @@ const executeSteps = async () => {
     gap: 1em;
 }
 
+.parameters {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
 .parameter {
     display: flex;
     flex-direction: column;
-    margin-top: 1em;
+
+    &.type-boolean {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5em;
+
+        & label {
+            margin-bottom: 0;
+        }
+    }
 
     & label {
-        font-weight: bold;
         margin-bottom: 0.5em;
     }
 
