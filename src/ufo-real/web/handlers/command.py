@@ -34,11 +34,11 @@ class CommandHandler(BaseHandler):
             request,
             Object(
                 {
-                    "enabled": Boolean(),
+                    "enable": Boolean(),
                 }
             ),
         )
-        enabled = bool(body["enabled"])
+        enabled = bool(body["enable"])
         await self._engine.sender.set_debug_logging(enabled)
         return web.Response()
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useSystemStore } from "@/stores/system";
 import Logger from "@/components/Logger.vue";
+import ScriptRunner from "@/components/ScriptRunner.vue";
 
 const systemStore = useSystemStore();
 </script>
@@ -12,6 +13,7 @@ const systemStore = useSystemStore();
             {{ systemStore.uiVersion }} | {{ systemStore.apiVersion }}
         </div>
     </main>
+    <ScriptRunner />
     <Logger />
 </template>
 
