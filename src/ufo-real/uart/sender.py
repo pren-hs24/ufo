@@ -29,8 +29,18 @@ class UARTSender:
         *,
         endianness: Endianness = Endianness.LITTLE,
     ) -> None:
-        self._sender = sender
+        self._uart = sender
         self._endianness = endianness
+
+    @property
+    def bus(self) -> UARTProtocol:
+        """Return the UART bus."""
+        return self._uart
+
+    @bus.setter
+    def bus(self, bus: UARTProtocol) -> None:
+        """Set the UART bus."""
+        self._uart = bus
 
     async def turn(self, angle: int, *, snap: bool = True) -> None:
         """Send a turn command."""
@@ -40,15 +50,15 @@ class UARTSender:
             angle,
             snap,
         )
-        await self._sender.send_command(UARTCommand.TURN, payload)
+        await self._uart.send_command(UARTCommand.TURN, payload)
 
     async def follow_line(self) -> None:
         """Send a follow line command."""
-        await self._sender.send_command(UARTCommand.FOLLOW_LINE)
+        await self._uart.send_command(UARTCommand.FOLLOW_LINE)
 
     async def set_debug_logging(self, enabled: bool) -> None:
         """Enable or disable debug logging."""
-        await self._sender.send_command(
+        await self._uart.send_command(
             UARTCommand.SET_DEBUG_LOGGING, bytes([int(enabled)])
         )
 
@@ -59,8 +69,8 @@ class UARTSender:
             self._endianness.concat("b"),
             speed,
         )
-        await self._sender.send_command(UARTCommand.SET_SPEED, payload)
+        await self._uart.send_command(UARTCommand.SET_SPEED, payload)
 
     async def destination_reached(self) -> None:
         """signalise that the destination was reached"""
-        await self._sender.send_command(UARTCommand.DESTINAITON_REACHED)
+        await self._uart.send_command(UARTCommand.DESTINAITON_REACHED)

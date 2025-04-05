@@ -30,8 +30,8 @@ class Engine:
 
     def init(self, bus: UARTProtocol) -> None:
         """init"""
-        self._sender = UARTSender(bus)
-        self._receiver = UARTReceiver(bus)
+        self._sender.bus = bus
+        self._receiver.bus = bus
         self._algorithm = self._create_algorithm(RoadSenseAlgorithm)
         self._logger.info("Engine initialised")
 

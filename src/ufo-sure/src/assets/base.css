@@ -1,0 +1,39 @@
+:root {
+    font-family: "Space Grotesk", system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    color: var(--fg);
+    background-color: var(--bg-mute);
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    --fg: #e1e1e1;
+    --fg-mute: #a1a1a1;
+    --bg: #242424;
+    --bg-mute: #1a1a1a;
+    --border: #333;
+    --accent: #535bf2;
+    --accent-dk: #030b92;
+    --primary: inherit;
+    --blue: var(--accent);
+    --green: #00bd7e;
+    --green-dk: #005a39;
+    --yellow: #c7aa19;
+    --red: #e85454;
+    --white: #ffffff;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --fg: #213547;
+        --fg-mute: #6c7a89;
+        --bg: #ffffff;
+        --bg-mute: #f9f9f9;
+        --border: #ddd;
+    }
+}

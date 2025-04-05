@@ -21,9 +21,21 @@ class UARTReceiver:
         self._uart = uart
         self._uart.on_event.add(self._on_event)
         self._logger = logging.getLogger("uart.recv")
-        self._event_handlers: dict[UARTEvent, set[UARTReceiver.AnyCallbackT]] = {
-            event: set() for event in UARTEvent
+        self._event_handlers: dict[UARTEvent, list[UARTReceiver.AnyCallbackT]] = {
+            event: [] for event in UARTEvent
         }
+
+    @property
+    def bus(self) -> UARTProtocol:
+        """Return the UART bus."""
+        return self._uart
+
+    @bus.setter
+    def bus(self, bus: UARTProtocol) -> None:
+        """Set the UART bus."""
+        self._uart = bus
+        self._uart.on_event.add(self._on_event)
+        self._logger.debug("UART bus set to: %s", bus)
 
     @overload
     def on(self, event: UARTEvent, handler: CallbackT) -> None:
@@ -39,7 +51,7 @@ class UARTReceiver:
 
     def on(self, event: UARTEvent, handler: AnyCallbackT) -> None:
         """Register an event handler."""
-        self._event_handlers[event].add(handler)
+        self._event_handlers[event].append(handler)
 
     async def _on_event(self, event: UARTEvent, payload: bytes) -> None:
         """Handle incoming events."""
@@ -47,17 +59,15 @@ class UARTReceiver:
             await self._on_generic_event(event, payload)
         if event == UARTEvent.LOG_MESSAGE:
             self._on_log_message(payload)
-        else:
-            self._logger.warning("Unhandled event: %s", event)
 
     async def _on_generic_event(self, event: UARTEvent, payload: bytes) -> None:
         """Handle generic events."""
         self._logger.debug("Received event: %s", event)
         for handler in self._event_handlers[event]:
-            if handler.__code__.co_argcount == 2:
+            if handler.__code__.co_argcount == 3:
                 handler = cast(UARTReceiver.EventPayloadCallbackT, handler)
                 await handler(event, payload)
-            elif handler.__code__.co_argcount == 1:
+            elif handler.__code__.co_argcount == 2:
                 handler = cast(UARTReceiver.EventCallbackT, handler)
                 await handler(event)
             else:

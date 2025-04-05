@@ -25,8 +25,21 @@ class UfoLogMessage:
     level: int = field(default=logging.INFO)
     timestamp: datetime.datetime = field(default_factory=datetime.datetime.now)
 
+    @property
+    def level_name(self) -> str:
+        """level_name"""
+        return logging.getLevelName(self.level)
+
+    def json(self) -> dict[str, str | int]:
+        """json"""
+        return {
+            "message": self.message,
+            "level": self.level_name,
+            "timestamp": self.timestamp.isoformat(),
+        }
+
     def __str__(self) -> str:
-        return f"{self.timestamp.isoformat()} {self.level:7}: {self.message}"
+        return f"{self.timestamp.isoformat()} {self.level_name:7}: {self.message}"
 
 
 _UfoLogSignal = Signal[Callable[[UfoLogMessage], Awaitable[None]]]
@@ -51,6 +64,8 @@ class UfoLogger(BaseUfoListener):
         return self._listeners
 
     async def _log(self, event: UfoLogMessage) -> None:
+        if not self._listeners.frozen:
+            self._listeners.freeze()
         self._events.append(event)
         await self._listeners.send(event)
 

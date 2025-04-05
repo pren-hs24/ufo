@@ -1,0 +1,1 @@
+.log[data-v-bb15e70f]{display:grid;grid-template-columns:18ch 7ch 1fr;gap:1ch;font-size:1rem;margin:.25em}.log .level.INFO[data-v-bb15e70f]{color:var(--blue)}.log .level.WARNING[data-v-bb15e70f]{color:var(--yellow)}.log .level.ERROR[data-v-bb15e70f],.log .level.CRITICAL[data-v-bb15e70f]{color:var(--red)}.logger[data-v-bb15e70f]{display:flex;flex-direction:column-reverse}

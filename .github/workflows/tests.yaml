@@ -5,12 +5,12 @@ on:
         types:
             - opened
         paths:
-            - "src/**.py"
+            - "src/ufo-real/**.py"
     push:
         paths:
-            - "src/**.py"
+            - "src/ufo-real/**.py"
             - requirements.txt
-            - github/workflows/tests.yaml
+            - .github/workflows/tests.yaml
     workflow_dispatch:
 
 jobs:
@@ -27,6 +27,6 @@ jobs:
                   python -m pip install --upgrade pip
                   pip install -r requirements.txt pytest
             - name: Run pytest
-              working-directory: ./src
+              working-directory: ./src/ufo-real
               run: |
                   python3 -m pytest

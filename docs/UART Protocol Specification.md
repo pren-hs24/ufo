@@ -140,8 +140,10 @@ This document defines the UART communication protocol for controlling and monito
 **Format**:
 
 ```
-0x15 [checksum]
+0x15 [state (uint8)] [checksum]
 ```
+
+- **state**: 0 = ready, 1 = hold
 
 ### 0x16 - Returning to Previous Position
 
