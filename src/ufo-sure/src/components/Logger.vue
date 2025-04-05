@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, onBeforeUnmount } from "vue";
 
 interface ILog {
     level: "CRITICAL" | "ERROR" | "WARNING" | "INFO" | "DEBUG" | "NOTSET";
@@ -45,6 +45,13 @@ function onWsOpen(this: WebSocket) {
 
 onMounted(() => {
     connectWebSocket();
+});
+
+onBeforeUnmount(() => {
+    if (!ws.value) return;
+
+    ws.value.onclose = null;
+    ws.value.close();
 });
 </script>
 <template>

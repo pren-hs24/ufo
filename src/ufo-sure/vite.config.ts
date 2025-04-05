@@ -1,30 +1,31 @@
-import { fileURLToPath, URL } from 'node:url'
+import { fileURLToPath, URL } from "node:url";
 
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import vueDevTools from "vite-plugin-vue-devtools";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
-  define: {
-    APP_VERSION: JSON.stringify(process.env.npm_package_version),
-  },
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+    plugins: [vue(), vueDevTools()],
+    build: {
+        outDir: "../ufo-real/public",
+        emptyOutDir: true,
     },
-  },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        ws: true,
-        secure: false
-      }
-    }
-  },
-})
+    define: {
+        APP_VERSION: JSON.stringify(process.env.npm_package_version),
+    },
+    resolve: {
+        alias: {
+            "@": fileURLToPath(new URL("./src", import.meta.url)),
+        },
+    },
+    server: {
+        proxy: {
+            "/api": {
+                target: "http://localhost:8080",
+                ws: true,
+                secure: false,
+            },
+        },
+    },
+});

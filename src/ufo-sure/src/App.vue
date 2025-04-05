@@ -17,7 +17,6 @@ import Sidebar from "./components/Sidebar.vue";
     position: relative;
     display: flex;
     flex-direction: row;
-    gap: 1em;
 
     .content {
         max-height: calc(100svh - 2em);
