@@ -26,3 +26,8 @@ class BaseAlgorithm(BaseUfoListener, ABC):
         self._sender = sender
         self._ufo = Ufo(sender, network.start)
         self._path: list[Node] = []
+
+    @property
+    def name(self) -> str:
+        """algorithm name"""
+        return self.__class__.__name__

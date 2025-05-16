@@ -28,20 +28,25 @@ class Engine:
         self._receiver = UARTReceiver(LogUARTBus())
         self._algorithm: BaseAlgorithm | None = None
 
-    def init(self, bus: UARTProtocol) -> None:
+    def init(
+        self,
+        bus: UARTProtocol,
+        manual: bool = False,
+    ) -> None:
         """init"""
         self._sender.bus = bus
         self._receiver.bus = bus
-        self._algorithm = self._create_algorithm(RoadSenseAlgorithm)
+        if not manual:
+            self._logger.info("Starting algorithm")
+            self._algorithm = self._create_algorithm(RoadSenseAlgorithm)
         self._logger.info("Engine initialised")
 
     def _create_algorithm[T: type[BaseAlgorithm]](self, of_type: T) -> BaseAlgorithm:
         return of_type(self._network_provider(), self.sender, self.receiver)
 
     @property
-    def algorithm(self) -> BaseAlgorithm:
+    def algorithm(self) -> BaseAlgorithm | None:
         """algorithm"""
-        assert self._algorithm is not None
         return self._algorithm
 
     def create_network(self) -> Network:

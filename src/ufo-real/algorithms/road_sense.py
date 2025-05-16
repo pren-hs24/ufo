@@ -75,3 +75,7 @@ class RoadSenseAlgorithm(BaseAlgorithm):
 
     async def _on_aligned(self) -> None:
         await self._ufo.follow_to_next_node()
+
+    @property
+    def name(self) -> str:
+        return "RoadSense"

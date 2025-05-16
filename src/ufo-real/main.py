@@ -36,6 +36,13 @@ def _get_args(logger: logging.Logger) -> Namespace:
     parser.add_argument(
         "--demo", action="store_true", default=False, help="Run the demo mode"
     )
+    parser.add_argument(
+        "-m",
+        "--manual",
+        action="store_true",
+        default=False,
+        help="Run manual mode (for testing, disables autonomy)",
+    )
     args = parser.parse_args()
     logger.debug("args: %s", args)
     return args
@@ -60,13 +67,13 @@ async def create_and_start_bus(args: Namespace, logger: logging.Logger) -> UARTP
 async def init_web(engine: Engine, args: Namespace, logger: logging.Logger) -> None:
     """Main async function."""
     uart = await create_and_start_bus(args, logger)
-    engine.init(uart)
+    engine.init(uart, args.manual)
 
 
 async def demo(engine: Engine, args: Namespace, logger: logging.Logger) -> None:
     """Main async function."""
     uart = await create_and_start_bus(args, logger)
-    engine.init(uart)
+    engine.init(uart, args.manual)
     sender = engine.sender
     bus = cast(MockUARTBus, engine.receiver.bus)
 

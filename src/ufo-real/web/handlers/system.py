@@ -14,6 +14,12 @@ class SystemHandler(BaseHandler):
 
     def add_routes(self, app: web.Application) -> None:
         app.router.add_get("/api/version", self._version)
+        app.router.add_get("/api/system/algorithm", self._algorithm)
 
     async def _version(self, _: web.Request) -> web.Response:
         return web.Response(text=VERSION)
+
+    async def _algorithm(self, _: web.Request) -> web.Response:
+        if self._engine.algorithm is None:
+            return web.HTTPNoContent()
+        return web.Response(text=self._engine.algorithm.name)
