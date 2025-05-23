@@ -140,7 +140,7 @@ const commands: ICommand[] = [
             },
         ],
         execute: async (params: Record<string, any>) => {
-            console.log(`Turning to ${params.angle} degrees`);
+            console.log(`Turning to ${params.angle} degrees, ${params.snap}`, params);
             await fetch("/api/command/turn", {
                 method: "POST",
                 body: JSON.stringify({ angle: params.angle, snap: params.snap }),
@@ -226,16 +226,16 @@ const paramId = ({ name }: { name: string }) => `param-${name}`;
                                 v-if="param.type == 'boolean'"
                                 type="checkbox"
                                 :id="paramId(param)"
-                                :checked="step.parameters[param.name]"
+                                v-model="step.parameters[param.name]"
                             />
                             <input
                                 v-else
-                                v-model="step.parameters[param.name]"
                                 :type="param.type"
                                 :required="param.required"
                                 :min="param.min"
                                 :max="param.max"
                                 :id="paramId(param)"
+                                v-model="step.parameters[param.name]"
                             />
                         </div>
                     </div>
