@@ -208,11 +208,11 @@ wheels = [
 
 [[package]]
 name = "pyaddict"
-version = "1.2.0.post1"
+version = "1.2.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/61/a2/825d3485218eb78fd878fc5182f6cabaf51615b858dde767e1ded32aaba5/pyaddict-1.2.0.post1.tar.gz", hash = "sha256:30e317280013382d39e95c5aaa48afee59c4d3764b646c39d69f56589d851af8", size = 27308 }
+sdist = { url = "https://files.pythonhosted.org/packages/13/5d/4d59c834a26dc4dbefb38b9530c3f2e0c5f86d6a5ba747962e35ebbb5899/pyaddict-1.2.2.tar.gz", hash = "sha256:6a56e6aed861d5c6cf82186f4f95464eee661d82dd9fef937a997cd1a5be8e0b", size = 27392 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0a/83/575eacfb1866a957fe060cf7d2c8b1619baebaea7f1d81cc2ed4a7313101/pyaddict-1.2.0.post1-py3-none-any.whl", hash = "sha256:cf763abc6bee2b9cd09426e75f3cfa2b7cd14eb54e132d6776fda2def496df05", size = 23694 },
+    { url = "https://files.pythonhosted.org/packages/88/9b/1b0fa69d35dc0931b51659120e88ba0a37a8b12f4e64a0627e5017d334c4/pyaddict-1.2.2-py3-none-any.whl", hash = "sha256:5c4cad577d0737722d7af718560d5de4354753b8ab0168551ef070cb99f2d7df", size = 23686 },
 ]
 
 [[package]]
@@ -280,7 +280,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.11.14" },
-    { name = "pyaddict", specifier = ">=1.2.0.post1" },
+    { name = "pyaddict", specifier = ">=1.2.1" },
     { name = "pyserial-asyncio", specifier = ">=0.6" },
     { name = "scipy", specifier = "==1.15.2" },
     { name = "uvloop", specifier = "==0.21.0" },

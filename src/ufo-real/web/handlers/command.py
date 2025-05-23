@@ -34,11 +34,11 @@ class CommandHandler(BaseHandler):
             request,
             Object(
                 {
-                    "enable": Boolean(),
+                    "enable": Boolean().optional().default(False),
                 }
             ),
         )
-        enabled = bool(body["enable"])
+        enabled = bool(body.get("enable", False))
         await self._engine.sender.set_debug_logging(enabled)
         return web.Response()
 
@@ -56,11 +56,11 @@ class CommandHandler(BaseHandler):
             Object(
                 {
                     "angle": Integer().min(-180).max(180),
-                    "snap": Boolean(),
+                    "snap": Boolean().optional().default(False),
                 }
             ),
         )
         angle = int(body["angle"])
-        snap = bool(body["snap"])
+        snap = bool(body.get("snap"))
         await self._engine.sender.turn(angle, snap=snap)
         return web.Response()
