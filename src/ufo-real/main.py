@@ -15,6 +15,7 @@ from serial_asyncio import open_serial_connection  # type: ignore
 
 from common.application import log_configuration
 from common.competition import create_network
+from common.constants import VERSION
 from uart.protocol import UARTProtocol
 from uart.bus import UARTBus
 from uart.mock.bus import UARTBus as MockUARTBus
@@ -121,6 +122,7 @@ def main() -> None:
     """main"""
     logging.config.dictConfig(log_configuration())
     logger = logging.getLogger(__name__)
+    logger.info("Welcome to %s", VERSION)
     logger.info("[main]")
     args = _get_args(logger)
 

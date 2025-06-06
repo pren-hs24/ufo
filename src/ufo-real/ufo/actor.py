@@ -3,6 +3,8 @@
 
 __copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
 
+from logging import getLogger
+
 from common.helper import Math
 from uart.sender import UARTSender
 from network.node import Node
@@ -15,11 +17,16 @@ class Ufo:
         self._sender = sender
         self._current_deg = 0.0
         self.current_or_last_node = start_node
+        self._logger = getLogger("ufo.actor.Ufo")
 
     def on_next_node_blocked(self) -> None:
         """called when next node is blocked"""
-        self._current_deg = Math.optimise_for_next_angle(
-            self._current_deg, self._current_deg + 180
+        self._logger.debug(
+            "Next node blocked, turning 180 degrees from (%d)", self._current_deg
+        )
+        self._current_deg = self._current_deg + 180
+        self._logger.debug(
+            "Next node blocked, turning 180 degrees to (%d)", self._current_deg
         )
 
     async def turn_on_node(self, on_node: Node, to_node: Node) -> None:
