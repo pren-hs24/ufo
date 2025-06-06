@@ -64,15 +64,20 @@ class UARTReceiver:
         """Handle generic events."""
         self._logger.debug("Received event: %s", event)
         for handler in self._event_handlers[event]:
-            if handler.__code__.co_argcount == 3:
-                handler = cast(UARTReceiver.EventPayloadCallbackT, handler)
-                await handler(event, payload)
-            elif handler.__code__.co_argcount == 2:
-                handler = cast(UARTReceiver.EventCallbackT, handler)
-                await handler(event)
-            else:
-                handler = cast(UARTReceiver.CallbackT, handler)
-                await handler()
+            try:
+                if handler.__code__.co_argcount == 3:
+                    handler = cast(UARTReceiver.EventPayloadCallbackT, handler)
+                    await handler(event, payload)
+                elif handler.__code__.co_argcount == 2:
+                    handler = cast(UARTReceiver.EventCallbackT, handler)
+                    await handler(event)
+                else:
+                    handler = cast(UARTReceiver.CallbackT, handler)
+                    await handler()
+            except Exception as e:  # pylint: disable=broad-except
+                self._logger.error(
+                    "Error in handler for event %s: %s", event, e, exc_info=True
+                )
 
     def _on_log_message(self, payload: bytes) -> None:
         """Handle the log message event."""
