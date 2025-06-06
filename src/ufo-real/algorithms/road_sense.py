@@ -26,6 +26,7 @@ class RoadSenseAlgorithm(BaseAlgorithm):
         self._node_index = 0
         self._target: Node | None = None
         self._recalculation_required = False
+        self._has_started = False
 
     def _set_new_path(self) -> None:
         assert self._target is not None
@@ -40,9 +41,14 @@ class RoadSenseAlgorithm(BaseAlgorithm):
 
     async def _on_start(self, target: Node) -> None:
         self._target = target
-        await self._restart()
+        await self._ufo.follow_to_next_node() # to start
 
     async def _on_point_reached(self) -> None:
+        if not self._has_started:
+            self._has_started = True
+            await self._restart()
+            return
+
         if self._recalculation_required:
             await self._restart()
             return
