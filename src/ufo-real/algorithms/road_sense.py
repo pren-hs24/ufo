@@ -41,7 +41,7 @@ class RoadSenseAlgorithm(BaseAlgorithm):
 
     async def _on_start(self, target: Node) -> None:
         self._target = target
-        await self._ufo.follow_to_next_node() # to start
+        await self._ufo.follow_to_next_node()  # to start
 
     async def _on_point_reached(self) -> None:
         if not self._has_started:
@@ -79,7 +79,9 @@ class RoadSenseAlgorithm(BaseAlgorithm):
         self._path[self._node_index + 1].disabled = True
         self._recalculation_required = True
 
-    async def _on_aligned(self) -> None:
+    async def _on_aligned(self, hold: bool) -> None:
+        if hold:
+            return
         await self._ufo.follow_to_next_node()
 
     @property

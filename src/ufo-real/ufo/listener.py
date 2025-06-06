@@ -22,11 +22,11 @@ class BaseUfoListener(ABC):
         self._receiver = receiver
 
         self._receiver.on(UARTEvent.START, self._on_event)
+        self._receiver.on(UARTEvent.ALIGNED, self._on_event)
         self._receiver.on(UARTEvent.POINT_REACHED, self._on_point_reached)
         self._receiver.on(UARTEvent.NO_LINE_FOUND, self._on_no_line_found)
         self._receiver.on(UARTEvent.NEXT_POINT_BLOCKED, self._on_next_point_blocked)
         self._receiver.on(UARTEvent.OBSTACLE_DETECTED, self._on_obstacle_detected)
-        self._receiver.on(UARTEvent.ALIGNED, self._on_aligned)
         self._receiver.on(UARTEvent.RETURNING, self._on_returning)
 
     async def _on_start(self, target: Node) -> None:
@@ -44,7 +44,7 @@ class BaseUfoListener(ABC):
     async def _on_obstacle_detected(self) -> None:
         pass
 
-    async def _on_aligned(self) -> None:
+    async def _on_aligned(self, hold: bool) -> None:
         pass
 
     async def _on_returning(self) -> None:
@@ -57,3 +57,6 @@ class BaseUfoListener(ABC):
             end_node_labels = [NodeLabel.A, NodeLabel.B, NodeLabel.C]
             end_node_label = end_node_labels[payload[0]]
             await self._on_start(self._network.get_node_by_label(end_node_label))
+        if event == UARTEvent.ALIGNED:
+            hold = payload[0] == 1
+            await self._on_aligned(hold)

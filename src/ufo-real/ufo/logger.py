@@ -84,8 +84,10 @@ class UfoLogger(BaseUfoListener):
     async def _on_obstacle_detected(self) -> None:
         await self._log(UfoLogMessage("Obstacle detected"))
 
-    async def _on_aligned(self) -> None:
-        await self._log(UfoLogMessage("Aligned"))
+    async def _on_aligned(self, hold: bool) -> None:
+        await self._log(
+            UfoLogMessage(f"Aligned ({'holding' if hold else 'not holding'})")
+        )
 
     async def _on_returning(self) -> None:
         await self._log(UfoLogMessage("Returning"))
