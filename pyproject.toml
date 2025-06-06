@@ -1,6 +1,6 @@
 [project]
 name = "UFO"
-version = "1.0.5"
+version = "1.0.6"
 description = "Source Code for the UFO"
 readme = "README.md"
 requires-python = ">=3.13"
