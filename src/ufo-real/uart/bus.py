@@ -59,7 +59,7 @@ class UARTBus(UARTProtocol):
         self._logger.debug("Received event: %s", event_id)
 
         payload = b""
-        if event_id == UARTEvent.START.value:
+        if event_id in (UARTEvent.START.value, UARTEvent.ALIGNED.value):
             payload = await self._reader.readexactly(1)
         if event_id == UARTEvent.LOG_MESSAGE.value:
             payload_size = await self._reader.readexactly(1)
