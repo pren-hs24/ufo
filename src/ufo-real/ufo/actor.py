@@ -33,6 +33,12 @@ class Ufo:
         """performs a turn on a node to a next node"""
         new_angle = Math.calculate_angle_deg(on_node, to_node)
         current_angle = Math.optimise_for_next_angle(self._current_deg, new_angle)
+        self._logger.debug(
+            "Turning on node from %d to %d degrees (current: %d)",
+            self._current_deg,
+            new_angle,
+            current_angle,
+        )
         d = int(new_angle - current_angle)
         await self._sender.turn(d, snap=True)
         self._current_deg = new_angle
