@@ -3,6 +3,7 @@
 
 __copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
 
+import asyncio
 from logging import getLogger
 
 from pathfinder.ipathfinder import IPathfinder
@@ -61,7 +62,7 @@ class RoadSenseAlgorithm(BaseAlgorithm):  # pylint: disable=too-many-instance-at
             self._logger.debug("Recalculation required, recalculating path")
             self._recalculation_required = False
             await self._restart()
-            return        
+            return
 
         self._node_index += 1
         self._ufo.current_or_last_node = self._path[self._node_index]
@@ -89,6 +90,7 @@ class RoadSenseAlgorithm(BaseAlgorithm):  # pylint: disable=too-many-instance-at
         self._network.get_edge(
             self._path[self._node_index], self._path[self._node_index + 1]
         ).disabled = True
+        await asyncio.sleep(100 / 1000)  # 100ms
         await self._restart()
 
     async def _on_returning(self) -> None:
