@@ -16,6 +16,12 @@ class Ufo:
         self._current_deg = 0.0
         self.current_or_last_node = start_node
 
+    def on_next_node_blocked(self) -> None:
+        """called when next node is blocked"""
+        self._current_deg = Math.optimise_for_next_angle(
+            self._current_deg, self._current_deg + 180
+        )
+
     async def turn_on_node(self, on_node: Node, to_node: Node) -> None:
         """performs a turn on a node to a next node"""
         new_angle = Math.calculate_angle_deg(on_node, to_node)

@@ -67,6 +67,7 @@ class RoadSenseAlgorithm(BaseAlgorithm):
 
     async def _on_next_point_blocked(self) -> None:
         self._path[self._node_index + 1].disabled = True
+        self._ufo.on_next_node_blocked()
         await self._restart()
 
     async def _on_no_line_found(self) -> None:
