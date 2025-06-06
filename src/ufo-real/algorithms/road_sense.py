@@ -52,11 +52,14 @@ class RoadSenseAlgorithm(BaseAlgorithm):  # pylint: disable=too-many-instance-at
         self._is_moving = False
 
         if not self._has_started:
+            self._logger.debug("Point reached, mark started")
             self._has_started = True
             await self._restart()
             return
 
         if self._recalculation_required:
+            self._logger.debug("Recalculation required, recalculating path")
+            self._recalculation_required = False
             await self._restart()
             return        
 
