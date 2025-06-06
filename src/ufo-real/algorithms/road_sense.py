@@ -58,9 +58,11 @@ class RoadSenseAlgorithm(BaseAlgorithm):  # pylint: disable=too-many-instance-at
 
         if self._recalculation_required:
             await self._restart()
-            return
+            return        
+
         self._node_index += 1
         self._ufo.current_or_last_node = self._path[self._node_index]
+        self._logger.debug("Reached node %s", self._path[self._node_index])
 
         if self._ufo.current_or_last_node == self._target:
             await self._ufo.destination_reached()
