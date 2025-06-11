@@ -16,7 +16,7 @@ class Ufo:
     def __init__(self, sender: UARTSender, start_node: Node) -> None:
         self._sender = sender
         self._current_deg = 0.0
-        self.current_or_last_node = start_node
+        self._current_or_last_node = start_node
         self._logger = getLogger("ufo.actor.Ufo")
 
     def on_next_node_blocked(self) -> None:
@@ -50,3 +50,13 @@ class Ufo:
     async def destination_reached(self) -> None:
         """destination reached"""
         await self._sender.destination_reached()
+
+    @property
+    def current_or_last_node(self) -> Node:
+        """current or last node"""
+        return self._current_or_last_node
+    
+    @property
+    def current_deg(self) -> float:
+        """current angle in degrees"""
+        return self._current_deg
