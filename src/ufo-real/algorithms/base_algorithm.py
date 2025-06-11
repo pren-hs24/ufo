@@ -48,6 +48,13 @@ class BaseAlgorithm(BaseUfoListener, ABC):  # pylint: disable=too-many-instance-
         self._start_time = datetime.now()
         self._target = target
 
+    def reset(self) -> None:
+        """reset algorithm"""
+        self._logger.info("Resetting")
+        self._target = None
+        self._node_index = 0
+        self._path = []
+
     async def _on_destination_reached(self) -> None:
         await self._ufo.destination_reached()
         self._logger.info(
@@ -55,9 +62,7 @@ class BaseAlgorithm(BaseUfoListener, ABC):  # pylint: disable=too-many-instance-
             self._target,
             datetime.now() - self._start_time,
         )
-        self._target = None
-        self._node_index = 0
-        self._path = []
+        self.reset()
 
     @property
     def name(self) -> str:

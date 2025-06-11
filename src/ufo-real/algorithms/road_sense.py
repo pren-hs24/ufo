@@ -15,6 +15,8 @@ from .base_algorithm import BaseAlgorithm
 class RoadSenseAlgorithm(BaseAlgorithm):
     """RoadSense"""
 
+    name = "RoadSense"
+
     def __init__(
         self,
         network: Network,
@@ -34,6 +36,7 @@ class RoadSenseAlgorithm(BaseAlgorithm):
     async def _on_start(self, target: Node) -> None:
         await super()._on_start(target)
         self._in_start_zone = True
+        self._recalculation_required = False
         await self._ufo.follow_to_next_node()  # to start
         self._is_moving = True
         self._logger.debug("Started navigation to %s", target)
@@ -99,7 +102,3 @@ class RoadSenseAlgorithm(BaseAlgorithm):
             return
         await self._ufo.follow_to_next_node()
         self._is_moving = True
-
-    @property
-    def name(self) -> str:
-        return "RoadSense"
