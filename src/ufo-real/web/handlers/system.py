@@ -31,7 +31,7 @@ class SystemHandler(BaseHandler):
     async def _set_algorithm(self, request: web.Request) -> web.Response:
         if "name" not in request.query:
             return web.HTTPBadRequest(text="Algorithm name is required")
-        
+
         algorithm_name = request.query.get("name")
 
         if algorithm_name not in (*ALGORITHMS.keys(), ""):

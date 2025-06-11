@@ -3,6 +3,7 @@
 
 __copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
 
+from typing import Callable
 from .edge import Edge
 from .node import Node, NodeType, NodeLabel
 
@@ -66,3 +67,6 @@ class Network:
 
     def __repr__(self) -> str:
         return str(self)
+
+
+type NetworkProvider = Callable[[], Network]

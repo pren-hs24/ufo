@@ -3,7 +3,6 @@
 
 __copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
 
-from typing import Callable
 import logging
 
 from algorithms.base_algorithm import BaseAlgorithm
@@ -12,7 +11,7 @@ from uart.protocol import UARTProtocol
 from uart.sender import UARTSender
 from uart.receiver import UARTReceiver
 from uart.mock.log_bus import LogUARTBus
-from network.network import Network
+from network.network import Network, NetworkProvider
 
 
 class Engine:
@@ -20,7 +19,7 @@ class Engine:
 
     def __init__(
         self,
-        network_provider: Callable[[], Network],
+        network_provider: NetworkProvider,
     ) -> None:
         self._network_provider = network_provider
         self._logger = logging.getLogger("engine")
@@ -54,7 +53,7 @@ class Engine:
         self._algorithm = self._create_algorithm(to_type)
 
     def _create_algorithm[T: type[BaseAlgorithm]](self, of_type: T) -> BaseAlgorithm:
-        return of_type(self._network_provider(), self.sender, self.receiver)
+        return of_type(self._network_provider, self.sender, self.receiver)
 
     @property
     def algorithm(self) -> BaseAlgorithm | None:

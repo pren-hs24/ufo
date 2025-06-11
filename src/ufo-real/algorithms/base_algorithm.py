@@ -13,7 +13,7 @@ from uart.receiver import UARTReceiver
 from uart.sender import UARTSender
 from ufo.actor import Ufo
 from ufo.listener import BaseUfoListener
-from network.network import Network
+from network.network import NetworkProvider
 from network.node import Node
 
 
@@ -22,14 +22,15 @@ class BaseAlgorithm(BaseUfoListener, ABC):  # pylint: disable=too-many-instance-
 
     def __init__(
         self,
-        network: Network,
+        network_provider: NetworkProvider,
         sender: UARTSender,
         receiver: UARTReceiver,
     ) -> None:
-        BaseUfoListener.__init__(self, network, receiver)
+        BaseUfoListener.__init__(self, network_provider(), receiver)
 
+        self._network_provider = network_provider
         self._sender = sender
-        self._ufo = Ufo(sender, network.start)
+        self._ufo = Ufo(sender, self._network.start)
         self._path: list[Node] = []
         self._target: Node | None = None
         self._start_time = datetime.now()
@@ -54,6 +55,7 @@ class BaseAlgorithm(BaseUfoListener, ABC):  # pylint: disable=too-many-instance-
         self._target = None
         self._node_index = 0
         self._path = []
+        self._network = self._network_provider()
 
     async def _on_destination_reached(self) -> None:
         await self._ufo.destination_reached()

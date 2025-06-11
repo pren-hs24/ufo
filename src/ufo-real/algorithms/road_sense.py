@@ -7,7 +7,7 @@ import asyncio
 
 from uart.receiver import UARTReceiver
 from uart.sender import UARTSender
-from network.network import Network
+from network.network import NetworkProvider
 from network.node import Node
 from .base_algorithm import BaseAlgorithm
 
@@ -19,11 +19,11 @@ class RoadSenseAlgorithm(BaseAlgorithm):
 
     def __init__(
         self,
-        network: Network,
+        network_provider: NetworkProvider,
         sender: UARTSender,
         receiver: UARTReceiver,
     ) -> None:
-        super().__init__(network, sender, receiver)
+        super().__init__(network_provider, sender, receiver)
         self._recalculation_required = False
         self._in_start_zone = True
         self._is_moving = False
