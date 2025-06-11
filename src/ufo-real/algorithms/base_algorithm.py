@@ -9,6 +9,7 @@ from logging import getLogger
 
 from pathfinder.ipathfinder import IPathfinder
 from pathfinder.dijkstra import DijkstraPathfinder
+from picamera2 import Picamera2
 from uart.receiver import UARTReceiver
 from uart.sender import UARTSender
 from ufo.actor import Ufo
