@@ -59,6 +59,13 @@ const toggleExpanded = () => {
                 <p class="version">{{ systemStore.uiVersion }}</p>
                 <p class="version">{{ systemStore.apiVersion }}</p>
             </template>
+            <RouterLink
+                to="/settings"
+                class="navitem"
+            >
+                <i class="fa-solid fa-cog"></i>
+                <span class="label">Settings</span>
+            </RouterLink>
             <div
                 class="navitem"
                 @click="toggleExpanded"
