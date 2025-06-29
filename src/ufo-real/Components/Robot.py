@@ -2,13 +2,13 @@
 # more understandable, better structured and easier to
 # adapt and fix
 
-import numpy as np
+from math import atan2, degrees, sqrt
 
 class Robot:
 
     posX: int
     posY: int
-    angle: int
+    angle: float
 
     # [Constructor] with all the values for the robot
     # - posX      = (int) horizontal position of the robot in mm
@@ -17,7 +17,7 @@ class Robot:
     # - angle     = (int) degree in which direction the camera is facing
     #               (0° to the right - East, 90° straight down - South,
     #               180° to the left - Weast, 270° straight up - North)
-    def __init__(self, posX: int, posY: int, angle: int):
+    def __init__(self, posX: int, posY: int, angle: float):
         self.posX = posX
         self.posY = posY
         self.angle = angle
@@ -36,30 +36,41 @@ class Robot:
         else:
             return False
 
-    def getPosX(self) -> int:
+    def get_posX(self) -> int:
         return self.posX
     
-    def __setPosX(self, newPosX: int) -> None:
+    def __set_posX(self, newPosX: int) -> None:
         self.posX = newPosX
     
-    def getPosY(self) -> int:
+    def get_posY(self) -> int:
         return self.posY
     
-    def __setPosY(self, newPosY: int) -> None:
+    def __set_posY(self, newPosY: int) -> None:
         self.posY = newPosY
     
-    def getDirection(self) -> int:
+    def get_direction(self) -> float:
         return self.angle
     
-    def __setDirection(self, newAngle: int) -> None:
+    def __setDirection(self, newAngle: float) -> None:
         self.angle = newAngle
 
-    def changePosition(self, posX: int, posY: int) -> None:
-        self.__setPosX(posX)
-        self.__setPosY(posY)
+    def change_position(self, coordinates: tuple[int, int]) -> None:
+        self.__set_posX(coordinates[0])
+        self.__set_posY(coordinates[1])
 
-    def turnAround(self, turnAngle: int) -> None:
-        self.__setDirection = (self.getDirection + turnAngle) % 360
+    def turnBy(self, turn_angle: float) -> None:
+        """
+        Change the direction in which the robot is facing by\n
+        ``turn_angle`` amount of degrees. Should be of type ``float``.
+        """
+        self.__setDirection(self.get_direction() + turn_angle % 360.0)
+
+    def turnTowards(self, coordinates: tuple[int, int]) -> None:
+        """
+        Set the robot's direction by inputting the new\n
+        ``coordinates`` it should be facing.
+        """
+        self.__setDirection(self._compute_angle(coordinates))
 
     # Helper function to determine the distance and angle of
     # a point on the plane in comparison to the robot
@@ -71,43 +82,30 @@ class Robot:
     # - dDeg    = (int) amount of ° to turn in order to be
     #             aligned between -180 and 180
     # - dDis    = (float) distance in mm towards the point
-    def compute_distance(self, x: int, y: int) -> tuple[float, float]:
-        # type check
-        if not isinstance(x, int) or not isinstance(y, int):
-            raise ImportError('Incorrct parameters')
-        
-        # setup
-        dx = x - self.posX
-        dy = y - self.posY
-        
-        # calculate angle
-        baseDeg = 0
-        # testing for edgecases and direction because arctan fails
-        # if dx == 0 and it can only show angles from -90° to +90°
-        # so it checks if the position is left (+90 to +270) or
-        # right (-90 to +90) of the robot
-        if dx == 0:
-            if dy == 0:
-                baseDeg = 0
-            elif y > self.posY: 
-                baseDeg = 90.0
-            else:
-                baseDeg = 270.0
-        else:
-            if x < self.posX:
-                baseDeg = 180.0 + np.degrees(np.arctan(dy/dx))
-            else:
-                baseDeg = np.degrees(np.arctan(dy/dx)) % 360.0
-        # getting the relative angle
-        tempDeg = (baseDeg - float(self.angle)) % 360.0
-        dDeg = 0
-        # normalizing angle to be between -180° and +180°
-        if tempDeg > 180.0:
-            dDeg = tempDeg - 360.0
-        else:
-            dDeg = tempDeg
+    def compute_distance_and_difference(self, coordinates: tuple[int, int]) -> tuple[float, float]:
+        """
+        It computes the distance between the robot and the point\n
+        with the given ``coordinates``, as well as the difference\n
+        between the direction in which the robot is facing and\n
+        the angle at which the point can be found.
+        """
+        # calculate difference in angles
+        dDeg = (self._compute_angle(coordinates) - self.get_direction() + 180.0) % 360 - 180.0
 
         # calculate distance
-        dDis = float(np.sqrt(dx**2 + dy**2))
+        dDis = self._compute_distance(coordinates)
         
         return (dDeg, dDis)
+
+    def _compute_angle(self, coordinates: tuple[int, int]) -> float:
+        dx, dy = self._compute_deltas(coordinates)
+        return degrees(atan2(dy, dx))
+    
+    def _compute_distance(self, coordinates: tuple[int, int]) -> float:
+        dx, dy = self._compute_deltas(coordinates)
+        return sqrt(dx**2 + dy**2)
+    
+    def _compute_deltas(self, coordinates: tuple[int, int]) -> tuple[int, int]:
+        dx = coordinates[0] - self.get_posX()
+        dy = coordinates[1] - self.get_posY()
+        return (dx, dy)

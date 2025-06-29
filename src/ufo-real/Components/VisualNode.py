@@ -2,7 +2,8 @@
 # more understandable, better structured and easier to
 # adapt and fix
 
-import numpy as np
+from typing import Self
+from math import sqrt
 
 class VisualNode:
 
@@ -18,7 +19,7 @@ class VisualNode:
     # - width     = (int) horizontal position of the node in px
     # - height    = (int) vertical position of the node in px
     # (center (0,0) is left upper corner)
-    def __init__(self, label: str, pos_x: int, pos_y: int, width: int, height: int) -> "VisualNode":
+    def __init__(self, label: str, pos_x: int, pos_y: int, width: int, height: int):
         self.label = label
         self.pos_x = pos_x
         self.pos_y = pos_y
@@ -61,6 +62,7 @@ class VisualNode:
     def get_dimensions(self) -> tuple[int, int]:
         return (self.width, self.height)
     
-    def getDistance(node1: "VisualNode", node2: "VisualNode") -> float:
-        return np.sqrt(np.square(node1.get_pos_x() - node2.get_pos_x())\
-                       + np.square(node1.get_pos_y() - node2.get_pos_y()))
+    def getDistance(self, other: Self) -> float:
+        """ Compute the distance between this and an other ``VisualNode``. """
+        return sqrt((self.get_pos_x() - other.get_pos_x())**2\
+                    + (self.get_pos_y() - other.get_pos_y())**2)

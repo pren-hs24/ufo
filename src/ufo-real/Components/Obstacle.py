@@ -53,11 +53,14 @@ class Obstacle:
     def get_id(self) -> str:
         return str(self.id)
     
-    def get_length() -> int:
+    @classmethod
+    def get_length(cls) -> int:
         return Obstacle.LENGTH
     
-    def get_depth() -> int:
+    @classmethod
+    def get_depth(cls) -> int:
         return Obstacle.DEPTH
     
-    def get_height() -> int:
+    @classmethod
+    def get_height(cls) -> int:
         return Obstacle.HEIGHT

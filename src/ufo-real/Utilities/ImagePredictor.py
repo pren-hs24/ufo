@@ -1,13 +1,26 @@
 from Components import Camera, RealNode, Robot, Graph, VisualNode, Obstacle, Edge
 from .NodeMatcher import find_best_matching
-from Basic import Colour, NodeState, EdgeState
+from Basic import Colour as c
+from typing import TypeVar
 
 import numpy as np
 import cv2
 
+# enabling polymorphism
+T = TypeVar('T')
+
+# parameter for the overlay
 SIZE: int = 5
 SIZE_LARGE: int = SIZE * 3
 ALPHA: float = 0.5
+
+# colour pre-sets
+BLACK = c.bgr("BLACK")
+LIGHT_GREY = c.bgr("LIGHT_GREY")
+RED = c.bgr("RED")
+ORANGE = c.bgr("ORANGE")
+YELLOW = c.bgr("YELLOW")
+GREEN = c.bgr("GREEN")
 
 def analyze_image(camera: Camera, robot: Robot, graph: Graph, nodes: list[VisualNode], obstacles: list[Obstacle], img) -> None:
     # renaming for clarification
@@ -28,7 +41,7 @@ def _compute_image_nodes_from_graph(camera: Camera, robot: Robot, graph: Graph) 
     result: list[VisualNode] = []
     
     for i in graph.getNodes():
-        r, d = robot.compute_distance(i.getPosX(), i.getPosY())
+        r, d = robot.compute_distance_and_difference(i.get_coordinates())
         x, y = camera.compute_image_position(r, d)
         w, h = camera.compute_object_image_dimensions(d, RealNode.get_real_radius())
         result.append(VisualNode(i.getLabel(), x, y, w, h))
@@ -68,69 +81,69 @@ def render_nodes_match_overlay(match: list[tuple[str, str]], nodes1: list[Visual
     cp_y: int = 0
     cp_w: int = 0
     cp_h: int = 0
-    cp_colour: Colour.value = Colour.BLACK.value
+    cp_colour = BLACK
 
     ms_x: int = 0
     ms_y: int = 0
     ms_w: int = 0
     ms_h: int = 0
-    ms_colour: Colour.value = Colour.BLACK.value
+    ms_colour = BLACK
 
     offset_x, offset_y = calculate_average_offset(matching, measured_nodes, computed_nodes)
 
     for n, m in matching:
         if not n == "" and n in computed_nodes and not m == "" and m in measured_nodes: # classical match found
-            cp_x, cp_y = computed_nodes[computed_nodes.index(n)].get_coordinates()
-            cp_w, cp_h = computed_nodes[computed_nodes.index(n)].get_dimensions()
-            cp_colour = Colour.BLACK.value
+            cp_x, cp_y = _find_node_by_str(computed_nodes, n).get_coordinates()
+            cp_w, cp_h = _find_node_by_str(computed_nodes, n).get_dimensions()
+            cp_colour = BLACK
 
-            ms_x, ms_y = measured_nodes[measured_nodes.index(m)].get_coordinates()
+            ms_x, ms_y = _find_node_by_str(measured_nodes, m).get_coordinates()
             if m.__contains__("P"): # special case for pylon nodes since they are blocked
-                ms_colour = Colour.RED.value
+                ms_colour = RED
                 pylons.append(n)
-                graph.getNodes()[graph.getNodes().index(n)].changeState(NodeState.BLOCKED)
+                _find_node_by_str(graph.getNodes(), n).isBlocked()
             else:
-                ms_colour = Colour.GREEN.value
-                graph.getNodes()[graph.getNodes().index(n)].changeState(NodeState.FREE)
+                ms_colour = GREEN
+                _find_node_by_str(graph.getNodes(), n).isAvailable()
 
             result.append(VisualNode.position_only(n, ms_x, ms_y))
         elif not n == "" and n in computed_nodes and m == "": # missed a node that got computed but not found in the image
-            cp_x, cp_y = computed_nodes[computed_nodes.index(n)].get_coordinates()
-            cp_w, cp_h = computed_nodes[computed_nodes.index(n)].get_dimensions()
-            cp_colour = Colour.BLACK.value
+            cp_x, cp_y = _find_node_by_str(computed_nodes, n).get_coordinates()
+            cp_w, cp_h = _find_node_by_str(computed_nodes, n).get_dimensions()
+            cp_colour = BLACK
 
             ms_x = cp_x + offset_x
             ms_y = cp_y + offset_y
-            ms_colour = Colour.YELLOW.value
+            ms_colour = YELLOW
 
             result.append(VisualNode.position_only(n, ms_x, ms_y))
         elif n == "" and not m == "" and m in measured_nodes: # node found in image that could not get match or is not a node
-            ms_x, ms_y = measured_nodes[measured_nodes.index(m)].get_coordinates()
-            ms_colour = Colour.ORANGE.value
+            ms_x, ms_y = _find_node_by_str(measured_nodes, m).get_coordinates()
+            ms_colour = ORANGE
             
             cp_x = ms_x - offset_x
             cp_y = ms_y - offset_y
             cp_w = 0
             cp_h = 0
-            cp_colour = Colour.BLACK.value
+            cp_colour = BLACK
        
         # draw with the given specs
 
         # compute nodes with expected dimension and label
-        cv2.ellipse(overlay, (cp_x, cp_y), (cp_w, cp_h), 0, 0, 360, Colour.LIGHT_GREY.value, -1)
-        cv2.ellipse(overlay, (cp_x, cp_y), (cp_w, cp_h), 0, 0, 360, Colour.BLACK.value, 1)
+        cv2.ellipse(overlay, (cp_x, cp_y), (cp_w, cp_h), 0, 0, 360, LIGHT_GREY, -1)
+        cv2.ellipse(overlay, (cp_x, cp_y), (cp_w, cp_h), 0, 0, 360, BLACK, 1)
         
         cv2.line(overlay, (cp_x-SIZE, cp_y-SIZE), (cp_x+SIZE, cp_y+SIZE), cp_colour, 1)
         cv2.line(overlay, (cp_x+SIZE, cp_y-SIZE), (cp_x-SIZE, cp_y+SIZE), cp_colour, 1) 
         
-        cv2.putText(overlay, n, (cp_x-SIZE_LARGE, cp_y-cp_h-SIZE_LARGE), cv2.FONT_HERSHEY_SIMPLEX, 1.5, Colour.BLACK.value, 3)
+        cv2.putText(overlay, n, (cp_x-SIZE_LARGE, cp_y-cp_h-SIZE_LARGE), cv2.FONT_HERSHEY_SIMPLEX, 1.5, BLACK, 3)
                 
         # places were the were measured
         cv2.line(overlay, (ms_x-SIZE, ms_y-SIZE), (ms_x+SIZE, ms_y+SIZE), ms_colour, 2)
         cv2.line(overlay, (ms_x+SIZE, ms_y-SIZE), (ms_x-SIZE, ms_y+SIZE), ms_colour, 2)
 
         # their connection
-        cv2.line(overlay, (cp_x, cp_y), (ms_x, ms_y), Colour.BLACK.value, 1)
+        cv2.line(overlay, (cp_x, cp_y), (ms_x, ms_y), BLACK, 1)
 
     cv2.addWeighted(overlay, ALPHA, img, 1 - ALPHA, 0, img)
 
@@ -171,18 +184,18 @@ def render_edges(nodes: list[VisualNode], obstacles: list[VisualNode], pylons: l
         label1 = n.getLabel()
         label2 = m.getLabel()
         if label1 in nodes and label2 in nodes:
-            x_1, y_1 = nodes[nodes.index(label1)].get_coordinates()
-            x_2, y_2 = nodes[nodes.index(label2)].get_coordinates()
+            x_1, y_1 = _find_node_by_str(nodes, label1).get_coordinates()
+            x_2, y_2 = _find_node_by_str(nodes, label2).get_coordinates()
 
             if label1 in pylons or label2 in pylons:
-                colour = Colour.RED.value
-                graph.getEdges()[graph.getEdges().index(e)].changeStatus(EdgeState.MISSING)
+                colour = RED
+                graph.getEdges()[graph.getEdges().index(e)].isMissing()
             elif _does_line_cross_any_obstacle((x_1, y_1), (x_2, y_2), obstacles):
-                colour = Colour.YELLOW.value
-                graph.getEdges()[graph.getEdges().index(e)].changeStatus(EdgeState.BLOCKED)
+                colour = YELLOW
+                graph.getEdges()[graph.getEdges().index(e)].isBlocked()
             else:
-                colour = Colour.GREEN.value
-                graph.getEdges()[graph.getEdges().index(e)].changeStatus(EdgeState.FREE)
+                colour = GREEN
+                graph.getEdges()[graph.getEdges().index(e)].isAvailable()
 
             cv2.line(overlay, (x_1, y_1), (x_2, y_2), colour, 1)
 
@@ -198,11 +211,11 @@ def render_groundplate_obstacle(obstacles: list[Obstacle], camera: Camera, img) 
         x, y = temp.get_coordinates()
         w, h = temp.get_dimensions()
         
-        cv2.ellipse(overlay,(x, y), (w, h), 0, 0, 360, Colour.RED.value, -1)
-        cv2.ellipse(overlay,(x, y), (w, h), 0, 0, 360, Colour.BLACK.value, 1)
+        cv2.ellipse(overlay,(x, y), (w, h), 0, 0, 360, RED, -1)
+        cv2.ellipse(overlay,(x, y), (w, h), 0, 0, 360, BLACK, 1)
 
-        cv2.line(overlay, (x-SIZE, y-SIZE), (x+SIZE, y+SIZE), Colour.BLACK.value, 1)
-        cv2.line(overlay, (x+SIZE, y-SIZE), (x-SIZE, y+SIZE), Colour.BLACK.value, 1)
+        cv2.line(overlay, (x-SIZE, y-SIZE), (x+SIZE, y+SIZE), BLACK, 1)
+        cv2.line(overlay, (x+SIZE, y-SIZE), (x-SIZE, y+SIZE), BLACK, 1)
 
         obstacles_images.append(VisualNode(f"O{o.get_id()}", x, y, w, h))
 
@@ -255,3 +268,13 @@ def _does_line_cross_any_obstacle(point_a: tuple[int, int], point_b: tuple[int, 
             break
 
     return result
+
+def _find_index_by_str(nodes: list[T], name: str) -> int:
+    for i, node in enumerate(nodes):
+        if node == name:
+            return i
+    raise ValueError(f"{name} not found")
+
+def _find_node_by_str(nodes: list[T], name: str) -> T:
+    value: int = _find_index_by_str(nodes, name)
+    return nodes[value]

@@ -4,9 +4,6 @@
 # information of the Pylon in the image to make it more
 # accessable in calculations.
 
-from Basic import EdgeState
-from .RealNode import RealNode
-
 class Pylon:
 
     REAL_HEIGHT: int = 100 # TODO: real height of Pylons messured in mm
@@ -65,5 +62,6 @@ class Pylon:
     def get_height(self) -> int:
         return self.ymax - self.ymin
     
-    def get_real_height() -> int:
+    @classmethod
+    def get_real_height(cls) -> int:
         return Pylon.REAL_HEIGHT

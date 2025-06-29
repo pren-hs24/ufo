@@ -2,7 +2,27 @@
 # more understandable, better structured and easier to
 # adapt and fix
 
-from Basic import NodeLabel, NodeState
+from enum import Enum
+
+class RealNodeState(Enum):
+    """RealNode state enumeration"""
+
+    UNKNOWN = 0
+    FREE = 1
+    BLOCKED = 2
+
+
+class RealNodeLabel(Enum):
+    """RealNode label enumeration"""
+
+    START = 0
+    A = 1
+    B = 2
+    C = 3
+    W = 4
+    X = 5
+    Y = 6
+    Z = 7
 
 class RealNode:
 
@@ -10,20 +30,20 @@ class RealNode:
 
     posX: int
     posY: int
-    label: NodeLabel
-    state: NodeState
+    label: RealNodeLabel
+    state: RealNodeState
 
     # [Constructor] with the values for physical nodes
     # - label     = (str) the label by which it is identified
     # - posX      = (int) horizontal position of the node in mm
     # - posY      = (int) vertical position of the node in mm
     # (center (0,0) is left upper corner)
-    def __init__(self, label: NodeLabel, posX: int, posY: int):
-        if not isinstance(label, NodeLabel):
+    def __init__(self, label: RealNodeLabel, posX: int, posY: int):
+        if not isinstance(label, RealNodeLabel):
             raise ValueError("Node generation failed. Label invalid.")
         
         self.label = label
-        self.state = NodeState.UNKNOWN
+        self.state = RealNodeState.UNKNOWN
         self.posX = posX
         self.posY = posY
 
@@ -43,7 +63,7 @@ class RealNode:
     def getLabel(self) -> str:
         return self.label.name
     
-    def setLabel(self, label: NodeLabel) -> None:
+    def setLabel(self, label: RealNodeLabel) -> None:
         self.label = label
     
     def getPosX(self) -> int:
@@ -61,12 +81,19 @@ class RealNode:
     def get_coordinates(self) -> tuple[int, int]:
         return (self.posX, self.posY)
 
-    def get_real_radius() -> int:
+    @classmethod
+    def get_real_radius(cls) -> int:
         return RealNode.REAL_RADIUS
     
     def changePosition(self, posX: int, posY: int) -> None:
-        self.__setPosX(posX)
-        self.__setPosY(posY)
+        self.setPosX(posX)
+        self.setPosY(posY)
 
-    def changeState(self, new_state: NodeState) -> None:
+    def isAvailable(self) -> None:
+        self._changeState(RealNodeState.FREE)
+    
+    def isBlocked(self) -> None:
+        self._changeState(RealNodeState.BLOCKED)
+    
+    def _changeState(self, new_state: RealNodeState) -> None:
         self.state = new_state

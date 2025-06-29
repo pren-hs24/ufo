@@ -25,7 +25,7 @@ def find_best_matching(image: list[VisualNode], calc: list[VisualNode]) -> list[
     if len(image) != len(calc):
         result = _create_subset_for_matching(image, calc)
     else:
-        result = _calculate_best_matching(image, calc, False)
+        eval, result = _calculate_best_matching(tuple(image), calc)
     
     return result
 
@@ -43,7 +43,7 @@ def find_best_matching(image: list[VisualNode], calc: list[VisualNode]) -> list[
 # - returns  = (list[(str,str)]) list of tuples that create the minimal Matching
 # alternative:
 # - returns  = (float, list[str,str]) same as above but with the distance
-def _calculate_best_matching(image: list[VisualNode], calc: list[VisualNode], needEval: bool) -> tuple[float, list[tuple[str, str]]] | list[tuple[str, str]]:
+def _calculate_best_matching(image: tuple[VisualNode, ...], calc: list[VisualNode]) -> tuple[float, list[tuple[str, str]]]:
     if len(image) != len(calc):
         raise ValueError("Calculation Failed. The arrays don't have the same length.")
     
@@ -57,10 +57,7 @@ def _calculate_best_matching(image: list[VisualNode], calc: list[VisualNode], ne
             currentBest = temp
             result = _calculate_matching(p,calc)
 
-    if needEval:
-        return (currentBest, result)
-    else:
-        return result
+    return (currentBest, result)
 
 # Private function that is needed in cases the list do not have the same length.
 # Generates subsets on all the possible subsets and recursively checks them all.
@@ -73,7 +70,7 @@ def _create_subset_for_matching(image: list[VisualNode], calc: list[VisualNode])
     len_image: int = len(image)
     len_calc: int = len(calc)
 
-    comb: list[list[VisualNode]] = []
+    comb: list[tuple[VisualNode, ...]] = []
     fix: list[VisualNode] = []
     overflow: list[VisualNode] = []
 
@@ -94,7 +91,7 @@ def _create_subset_for_matching(image: list[VisualNode], calc: list[VisualNode])
 
     # try every subset
     for c in comb:
-        tempDis, tempRes = _calculate_best_matching(c, fix, True)
+        tempDis, tempRes = _calculate_best_matching(c, fix)
         if tempDis < currentBest:
             currentBest = tempDis
             result = tempRes
@@ -110,7 +107,7 @@ def _create_subset_for_matching(image: list[VisualNode], calc: list[VisualNode])
 # - image   = Array of VisualNodes
 # - calc    = Array of VisualNodes
 # - returns = (float) total distance
-def _calculate_distance(image: list[VisualNode], calc: list[VisualNode]) -> float:
+def _calculate_distance(image: tuple[VisualNode, ...], calc: list[VisualNode]) -> float:
     if len(image) != len(calc):
         raise ValueError("Calculation Failed. The arrays don't have the same length.")
     
@@ -124,7 +121,7 @@ def _calculate_distance(image: list[VisualNode], calc: list[VisualNode]) -> floa
 # - image   = Array of Nodes
 # - calc    = Array of Nodes
 # - returns = Array of Tuples
-def _calculate_matching(image: list[VisualNode], calc: list[VisualNode]) -> list[tuple[str, str]]:
+def _calculate_matching(image: tuple[VisualNode, ...], calc: list[VisualNode]) -> list[tuple[str, str]]:
     if len(image) != len(calc):
         raise ValueError("Calculation Failed. The arrays don't have the same length.")
     

@@ -189,7 +189,7 @@ class Camera:
     def compute_groundplate(self, obstacle: Obstacle) -> VisualNode:
         
         distance: float = self._compute_obstacle_distance(obstacle)
-        o_width, o_height = self.compute_object_image_dimensions(distance, Obstacle.get_length() / 2)
+        o_width, o_height = self.compute_object_image_dimensions(distance, Obstacle.get_length() // 2)
         
         pos_x = (obstacle.get_upper_left()[0] + obstacle.get_lower_right()[0]) // 2
         pos_y = obstacle.get_lower_right()[1] - o_height // 2

@@ -11,12 +11,8 @@
 # easier to adapt or fix in the almost certain case something
 # breaks.
 
-from Basic import NodeLabel, NodeState, EdgeState
-
 from .RealNode import RealNode
 from .Edge import Edge
-
-import numpy as np
 
 class Graph:
 
@@ -51,12 +47,17 @@ class Graph:
         return output
 
     def __eq__(self, value):
-        if isinstance(value, RealNode):
-            return self.label == value
-        elif isinstance(value, RealNode):
-            return self.label == value.label and\
-                self.posX == value.posX and\
-                self.posY == value.posY
+        if isinstance(value, list):
+            if not value:
+                return not self.arr_nodes or not self.arr_edges
+            elif isinstance(value[0], RealNode):
+                return self.arr_nodes == value
+            elif isinstance(value[0], Edge):
+                return self.arr_edges == value
+            else:
+                return False
+        elif isinstance(value, Graph):
+            return self.arr_nodes == value.arr_nodes and self.arr_edges == value.arr_edges
         else:
             return False
 
@@ -68,7 +69,7 @@ class Graph:
     # - arr_nodes   = (NumPy Array[RealNode]) array of nodes
     # - arr_edges   = (NumPy Array[Edge]) array of corrisponding edges
     # - return      = True if everthing is in order.
-    def __valid_graph(self, arr_nodes, arr_edges):
+    def __valid_graph(self, arr_nodes: list[RealNode], arr_edges: list[Edge]) -> bool:
         # type testing
         if not isinstance(arr_nodes, list):
             raise ValueError("Graph generation failed. The nodes array was invalid.")
@@ -81,8 +82,8 @@ class Graph:
         
         for e in arr_edges:
             if not isinstance(e,Edge) or\
-            not np.isin(Edge.getNodes(e)[0],arr_nodes) or\
-            not np.isin(Edge.getNodes(e)[1],arr_nodes):
+            not Edge.getNodes(e)[0] in arr_nodes or\
+            not Edge.getNodes(e)[1] in arr_nodes:
                 raise ValueError("Graph generation failed. The edges array contained an invalid edge.")
             
         return True
@@ -91,12 +92,24 @@ class Graph:
     def getNodes(self) -> list[RealNode]:
         return self.arr_nodes
     
+    def get_node_by_str(self, name: str) -> RealNode:
+        """
+        Looks at all the nodes in the graph and returns the first\n
+        ``RealNode`` matching with the given ``String``. Will raise\n
+        ``ValueError`` if there is no matching node.
+        """
+        nodes: list[RealNode] = self.getNodes()
+        for node in nodes:
+            if node == name:
+                return node
+        raise ValueError(f"{name} not found")
+
     def getEdges(self) -> list[Edge]:
         return self.arr_edges
-    
+        
     def update(self, matching: tuple[str, str]) -> None:
         for label1, label2 in matching:
             for node in self.getNodes():
                 if label1 == node.getLabel() or label2 == node.getLabel():
-                    node.changeState(NodeState.FREE)
+                    node.isAvailable()
                     break

@@ -2,8 +2,15 @@
 # the code more understandable, well organized and easier to
 # adapt in case something changes
 
-from Basic import EdgeState
+from enum import Enum
+
 from .RealNode import RealNode
+
+class EdgeState(Enum):
+    FREE = 0
+    MISSING = 1
+    BLOCKED = 2
+    UNKNOWN = 3
 
 class Edge:
 
@@ -17,11 +24,11 @@ class Edge:
     # (edges are treated als bidirectional)
     # - status    = (EdgeState) reflects the current amount
     #               of knowledge we have of this edge
-    def __init__(self, start: RealNode, end: RealNode, status: EdgeState):
-        if isinstance(start,RealNode) and isinstance(end,RealNode) and isinstance(status,EdgeState):
+    def __init__(self, start: RealNode, end: RealNode):
+        if isinstance(start,RealNode) and isinstance(end,RealNode):
             self.start = start
             self.end = end
-            self.status = status
+            self.status = EdgeState.UNKNOWN
         else:
             raise ValueError("Edge generation failed. Invalid types where provided.")
     
@@ -41,5 +48,15 @@ class Edge:
     def getStatus(self) -> str:
         return self.status.name
     
-    def changeStatus(self, newStatus: EdgeState) -> None:
-        self.status = newStatus
+    def isAvailable(self) -> None:
+        self._change_status_if_different(EdgeState.FREE)
+    
+    def isBlocked(self) -> None:
+        self._change_status_if_different(EdgeState.BLOCKED)
+    
+    def isMissing(self) -> None:
+        self._change_status_if_different(EdgeState.MISSING)
+    
+    def _change_status_if_different(self, new_status: EdgeState) -> None:
+        if not self.status == new_status:
+            self.status = new_status

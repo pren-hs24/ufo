@@ -50,7 +50,8 @@ class Node:
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, Node):
             return False
-        return self.label == value.label
-
+        else:
+            return self.label == value.label
+        
     def __hash__(self) -> int:
         return hash(self.label)

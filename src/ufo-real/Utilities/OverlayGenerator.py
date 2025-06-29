@@ -1,5 +1,5 @@
 from Components import Camera, Graph, RealNode, Robot
-from Basic import Colour
+from Basic import Colour as c
 
 import numpy as np
 import cv2
@@ -7,6 +7,11 @@ import matplotlib.pyplot as plt
 
 ALPHA: float = 0.8
 REAL_WIDTH: int = 4500
+
+# Colour presets
+BLACK = c.bgr("BLACK")
+LIGHT = c.bgr("LIGHT")
+GREEN = c.bgr("GREEN")
 
 def generate_map_overlay(camera: Camera, graph: Graph, robot: Robot, img) -> None:
     overlay = img.copy()
@@ -25,14 +30,14 @@ def generate_map_overlay(camera: Camera, graph: Graph, robot: Robot, img) -> Non
     map_lower_right: tuple[int, int] = (image_width - boarder, map_size + boarder)
 
     # draw map background
-    cv2.rectangle(overlay, map_upper_left, map_lower_right, Colour.BLACK.value, -1)
-    cv2.rectangle(overlay, map_upper_left, map_lower_right, Colour.LIGHT.value, 1)
+    cv2.rectangle(overlay, map_upper_left, map_lower_right, BLACK, -1)
+    cv2.rectangle(overlay, map_upper_left, map_lower_right, LIGHT, 1)
 
     # Draw all nodes
     for n in graph.getNodes():
         point = _convert_to_map_coordinates(n.get_coordinates(), ratio, map_upper_left)
 
-        cv2.circle(overlay, point, 5, Colour.LIGHT.value, -1)
+        cv2.circle(overlay, point, 5, LIGHT, -1)
 
     # Draw all edges
     for e in graph.getEdges():
@@ -41,14 +46,14 @@ def generate_map_overlay(camera: Camera, graph: Graph, robot: Robot, img) -> Non
         pointA = _convert_to_map_coordinates(nodeA.get_coordinates(), ratio, map_upper_left)
         pointB = _convert_to_map_coordinates(nodeB.get_coordinates(), ratio, map_upper_left)
 
-        cv2.line(overlay, pointA, pointB, Colour.LIGHT.value, 1)
+        cv2.line(overlay, pointA, pointB, LIGHT, 1)
 
     # Draw robot and FOV triangle
     fov_length: int = 1000  # in mm
-    left_angle: float = np.radians(robot.getDirection()) - np.radians(camera.getHFOV()) / 2
-    right_angle: float = np.radians(robot.getDirection()) + np.radians(camera.getHFOV()) / 2
-    robot_x: int = robot.getPosX()
-    robot_y: int = robot.getPosY()
+    left_angle: float = np.radians(robot.get_direction()) - np.radians(camera.getHFOV()) / 2
+    right_angle: float = np.radians(robot.get_direction()) + np.radians(camera.getHFOV()) / 2
+    robot_x: int = robot.get_posX()
+    robot_y: int = robot.get_posY()
 
     p1 = (int(robot_x), int(robot_y))
     p2 = (int(robot_x + fov_length * np.cos(left_angle)), int(robot_y + fov_length * np.sin(left_angle)))
@@ -58,9 +63,9 @@ def generate_map_overlay(camera: Camera, graph: Graph, robot: Robot, img) -> Non
     m2 = _convert_to_map_coordinates(p2, ratio, map_upper_left)
     m3 = _convert_to_map_coordinates(p3, ratio, map_upper_left)
 
-    cv2.circle(overlay, m1, 10, Colour.GREEN.value, -1)  # robot position
-    cv2.line(overlay, m1, m2, Colour.GREEN.value, 1)
-    cv2.line(overlay, m1, m3, Colour.GREEN.value, 1)
+    cv2.circle(overlay, m1, 10, GREEN, -1)  # robot position
+    cv2.line(overlay, m1, m2, GREEN, 1)
+    cv2.line(overlay, m1, m3, GREEN, 1)
 
     cv2.addWeighted(overlay, ALPHA, img, 1 - ALPHA, 0, img)
 

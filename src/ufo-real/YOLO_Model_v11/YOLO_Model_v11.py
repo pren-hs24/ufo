@@ -1,3 +1,4 @@
+# pyright: basic
 import os
 import sys
 import argparse
@@ -11,6 +12,7 @@ from typing import Optional
 from array import *
 
 from Components import VisualNode, Pylon, Obstacle, Camera
+from uart.fake import picamera_import
 
 # Define and parse user input arguments
 
@@ -29,10 +31,10 @@ from Components import VisualNode, Pylon, Obstacle, Camera
 #                    action='store_true')
 #args = parser.parse_args()
 
-def yolo_detect(model: str, source: str,  camera: Camera, thresh: Optional[float] = 0.4, resolution: Optional[str] = None, record: Optional[bool]=False):
+
+def yolo_detect(model_path: str, source: str,  camera: Camera, thresh: Optional[float] = 0.4, resolution: Optional[str] = None, record: Optional[bool]=False):
 
     # Parse user inputs
-    model_path = model
     img_source = source
     min_thresh = thresh
     user_res = resolution
@@ -90,7 +92,7 @@ def yolo_detect(model: str, source: str,  camera: Camera, thresh: Optional[float
         # Set up recording
         record_name = 'demo1.avi'
         record_fps = 30
-        recorder = cv2.VideoWriter(record_name, cv2.VideoWriter_fourcc(*'MJPG'), record_fps, (resW,resH))
+        recorder = cv2.VideoWriter(record_name, cv2.VideoWriter_fourcc(*'MJPG'), record_fps, (resW,resH)) # type: ignore
 
     # Load or initialize image source
     if source_type == 'image':
@@ -114,7 +116,7 @@ def yolo_detect(model: str, source: str,  camera: Camera, thresh: Optional[float
             ret = cap.set(4, resH)
 
     elif source_type == 'picamera':
-        from picamera2 import Picamera2
+        from picamera2 import Picamera2 # type: ignore
         cap = Picamera2()
         cap.configure(cap.create_video_configuration(main={"format": 'RGB888', "size": (resW, resH)}))
         cap.start()
@@ -156,7 +158,7 @@ def yolo_detect(model: str, source: str,  camera: Camera, thresh: Optional[float
                 break
 
         elif source_type == 'picamera': # If source is a Picamera, grab frames using picamera interface
-            frame = cap.capture_array()
+            frame = cap.capture_array() # type: ignore
             if (frame is None):
                 print('Unable to read frames from the Picamera. This indicates the camera is disconnected or not working. Exiting program.')
                 break
@@ -269,7 +271,7 @@ def yolo_detect(model: str, source: str,  camera: Camera, thresh: Optional[float
         if source_type == 'video' or source_type == 'usb':
             cap.release()
         elif source_type == 'picamera':
-            cap.stop()
+            cap.stop() # type: ignore
         if record: recorder.release()
         #cv2.destroyAllWindows()
 
