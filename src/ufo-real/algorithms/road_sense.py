@@ -7,7 +7,7 @@ import asyncio
 
 from uart.receiver import UARTReceiver
 from uart.sender import UARTSender
-from network.network import Network
+from network.network import NetworkProvider
 from network.node import Node
 from .base_algorithm import BaseAlgorithm
 
@@ -15,13 +15,15 @@ from .base_algorithm import BaseAlgorithm
 class RoadSenseAlgorithm(BaseAlgorithm):
     """RoadSense"""
 
+    name = "RoadSense"
+
     def __init__(
         self,
-        network: Network,
+        network_provider: NetworkProvider,
         sender: UARTSender,
         receiver: UARTReceiver,
     ) -> None:
-        super().__init__(network, sender, receiver)
+        super().__init__(network_provider, sender, receiver)
         self._recalculation_required = False
         self._in_start_zone = True
         self._is_moving = False
@@ -34,6 +36,7 @@ class RoadSenseAlgorithm(BaseAlgorithm):
     async def _on_start(self, target: Node) -> None:
         await super()._on_start(target)
         self._in_start_zone = True
+        self._recalculation_required = False
         await self._ufo.follow_to_next_node()  # to start
         self._is_moving = True
         self._logger.debug("Started navigation to %s", target)
@@ -99,7 +102,3 @@ class RoadSenseAlgorithm(BaseAlgorithm):
             return
         await self._ufo.follow_to_next_node()
         self._is_moving = True
-
-    @property
-    def name(self) -> str:
-        return "RoadSense"

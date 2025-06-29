@@ -3,7 +3,6 @@
 
 __copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
 
-from typing import Callable
 import logging
 
 from algorithms.base_algorithm import BaseAlgorithm
@@ -12,7 +11,7 @@ from uart.protocol import UARTProtocol
 from uart.sender import UARTSender
 from uart.receiver import UARTReceiver
 from uart.mock.log_bus import LogUARTBus
-from network.network import Network
+from network.network import Network, NetworkProvider
 
 
 class Engine:
@@ -20,7 +19,7 @@ class Engine:
 
     def __init__(
         self,
-        network_provider: Callable[[], Network],
+        network_provider: NetworkProvider,
     ) -> None:
         self._network_provider = network_provider
         self._logger = logging.getLogger("engine")
@@ -41,8 +40,20 @@ class Engine:
             self._algorithm = self._create_algorithm(RoadSenseAlgorithm)
         self._logger.info("Engine initialised")
 
+    def change_algorithm(self, to_type: type[BaseAlgorithm] | None) -> None:
+        """change algorithm"""
+        if self._algorithm is not None:
+            self._logger.info("Stopping current algorithm")
+            del self._algorithm
+        if to_type is None:
+            self._logger.info("No algorithm specified, manual control enabled")
+            self._algorithm = None
+            return
+        self._logger.info("Changing algorithm to %s", to_type.__name__)
+        self._algorithm = self._create_algorithm(to_type)
+
     def _create_algorithm[T: type[BaseAlgorithm]](self, of_type: T) -> BaseAlgorithm:
-        return of_type(self._network_provider(), self.sender, self.receiver)
+        return of_type(self._network_provider, self.sender, self.receiver)
 
     @property
     def algorithm(self) -> BaseAlgorithm | None:
@@ -64,3 +75,10 @@ class Engine:
         """receiver"""
         assert self._receiver is not None
         return self._receiver
+
+    def reset(self) -> None:
+        """reset engine"""
+        self._logger.info("Resetting engine")
+        if self._algorithm is not None:
+            self._algorithm.reset()
+        self._logger.info("Engine reset complete")

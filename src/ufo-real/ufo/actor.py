@@ -55,7 +55,7 @@ class Ufo:
     def current_or_last_node(self) -> Node:
         """current or last node"""
         return self._current_or_last_node
-    
+
     @current_or_last_node.setter
     def current_or_last_node(self, node: Node) -> None:
         """set current or last node"""

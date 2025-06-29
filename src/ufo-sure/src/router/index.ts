@@ -18,6 +18,12 @@ const router = createRouter({
             name: "logger",
             component: () => import("../views/LoggerView.vue"),
         },
+        ,
+        {
+            path: "/settings",
+            name: "settings",
+            component: () => import("../views/SettingsView.vue"),
+        },
     ],
 });
 

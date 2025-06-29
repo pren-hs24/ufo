@@ -14,7 +14,7 @@ from aiohttp import web
 from serial_asyncio import open_serial_connection  # type: ignore
 
 from common.application import log_configuration
-from common.competition import create_network
+from common.competition import create_dynamic_network
 from common.constants import VERSION
 from uart.protocol import UARTProtocol
 from uart.bus import UARTBus
@@ -128,7 +128,7 @@ def main() -> None:
 
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-    engine = Engine(create_network)
+    engine = Engine(create_dynamic_network)
     server = WebServer(engine)
     server.on_startup.append(_on_startup(engine, args, logger))
     server.run(args.port)

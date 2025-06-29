@@ -2,10 +2,6 @@ name: mypy
 
 on:
     pull_request:
-        types:
-            - opened
-        paths:
-            - "src/ufo-real/**.py"
     push:
         paths:
             - "src/ufo-real/**.py"
@@ -15,6 +11,7 @@ on:
 
 jobs:
     build:
+        name: mypy
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
