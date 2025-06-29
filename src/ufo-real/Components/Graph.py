@@ -1,20 +1,27 @@
+# -*- coding: utf-8 -*-
+"""Graph class"""
+
+__copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
+
 # Utility base class for the underlying Graph. Containes all
 # the Nodes and Edges that are in a Graph. It's supposed to be
 # very adaptive and allow for quick changes and adjustments
 # because all the locations need to be measured first.
-# 
+#
 # Since we don't know how taxing that is different definition
 # for the localization of the Nodes would be helpfull.
-# 
+#
 # General structure of object oriented programming in order
 # to make the code more understandable, better structured and
 # easier to adapt or fix in the almost certain case something
 # breaks.
 
-from .RealNode import RealNode
-from .Edge import Edge
+from .edge import Edge
+from .real_node import RealNode
+
 
 class Graph:
+    """visual representation of a graph"""
 
     arr_nodes: list[RealNode]
     arr_edges: list[Edge]
@@ -23,24 +30,23 @@ class Graph:
     # - arr_nodes   = (NumPy Array[RealNode]) array of nodes
     # - arr_edges   = (NumPy Array[Edge]) array of corrisponding edges
     def __init__(self, arr_nodes: list[RealNode], arr_edges: list[Edge]):
-
         # check if input valid
         if not self.__valid_graph(arr_nodes, arr_edges):
             raise ValueError("Graph generation failed. Inputs invalid.")
-           
+
         self.arr_nodes = arr_nodes
         self.arr_edges = arr_edges
 
     def __str__(self):
         output = "\n--------------\nGraph Content\n--------------\n"
-        
+
         for n in self.arr_nodes:
             output += f"{n}\n"
-        
+
         output += "\n"
-        for e in range(len(self.arr_edges)):
-            output += f"{self.arr_edges[e]}"
-            if not e == len(self.arr_edges) - 1:
+        for e in self.arr_edges:
+            output += f"{e}"
+            if not e == self.arr_edges[-1]:
                 output += ";\n"
 
         output += ""
@@ -57,7 +63,9 @@ class Graph:
             else:
                 return False
         elif isinstance(value, Graph):
-            return self.arr_nodes == value.arr_nodes and self.arr_edges == value.arr_edges
+            return (
+                self.arr_nodes == value.arr_nodes and self.arr_edges == value.arr_edges
+            )
         else:
             return False
 
@@ -75,41 +83,51 @@ class Graph:
             raise ValueError("Graph generation failed. The nodes array was invalid.")
         if not isinstance(arr_edges, list):
             raise ValueError("Graph generation failed. The edges array was invalid.")
-        
+
         for n in arr_nodes:
-            if not isinstance(n,RealNode):
-                raise ValueError("Graph generation failed. The nodes array contained an invalid node.")
-        
+            if not isinstance(n, RealNode):
+                raise ValueError(
+                    "Graph generation failed. The nodes array contained an invalid node."
+                )
+
         for e in arr_edges:
-            if not isinstance(e,Edge) or\
-            not Edge.getNodes(e)[0] in arr_nodes or\
-            not Edge.getNodes(e)[1] in arr_nodes:
-                raise ValueError("Graph generation failed. The edges array contained an invalid edge.")
-            
+            if (
+                not isinstance(e, Edge)
+                or e.get_nodes[0] not in arr_nodes
+                or e.get_nodes[1] not in arr_nodes
+            ):
+                raise ValueError(
+                    "Graph generation failed. The edges array contained an invalid edge."
+                )
+
         return True
 
-    
-    def getNodes(self) -> list[RealNode]:
+    @property
+    def get_nodes(self) -> list[RealNode]:
+        """returns a list of the nodes"""
         return self.arr_nodes
-    
+
     def get_node_by_str(self, name: str) -> RealNode:
         """
         Looks at all the nodes in the graph and returns the first\n
         ``RealNode`` matching with the given ``String``. Will raise\n
         ``ValueError`` if there is no matching node.
         """
-        nodes: list[RealNode] = self.getNodes()
+        nodes: list[RealNode] = self.arr_nodes
         for node in nodes:
             if node == name:
                 return node
         raise ValueError(f"{name} not found")
 
-    def getEdges(self) -> list[Edge]:
+    @property
+    def get_edges(self) -> list[Edge]:
+        """returns a list of the edges"""
         return self.arr_edges
-        
+
     def update(self, matching: tuple[str, str]) -> None:
-        for label1, label2 in matching:
-            for node in self.getNodes():
-                if label1 == node.getLabel() or label2 == node.getLabel():
-                    node.isAvailable()
+        """sets all the edges from the matching to available"""
+        for match in matching:
+            for node in self.arr_nodes:
+                if match[0] == node.get_label or match[1] == node.get_label:
+                    node.is_available()
                     break

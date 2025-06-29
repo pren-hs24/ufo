@@ -1,12 +1,23 @@
+# -*- coding: utf-8 -*-
+"""Colour module"""
+
+__copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
+
 from enum import Enum
 from typing import NamedTuple
 
+
 class RGB(NamedTuple):
+    """clear addressable RGB-Tuple"""
+
     r: int
     g: int
     b: int
-    
+
+
 class ColourTypes(Enum):
+    """pre-defined colours to chose from"""
+
     BLACK = RGB(0, 0, 0)
     DARK_GREY = RGB(100, 100, 100)
     LIGHT_GREY = RGB(200, 200, 200)
@@ -19,11 +30,13 @@ class ColourTypes(Enum):
 
     def __eq__(self, value: object) -> bool:
         if isinstance(value, str):
-            return ColourTypes.name == value
+            return self.name == value
         else:
             return super().__eq__(value)
 
-class Colour():
+
+class Colour:
+    """Colours in various needed formats"""
 
     @classmethod
     def rgb(cls, name: str) -> tuple[int, int, int]:
@@ -45,7 +58,7 @@ class Colour():
         """
         r, g, b = cls.rgb(name)
         return (b, g, r)
-    
+
     @classmethod
     def hex(cls, name: str) -> str:
         """

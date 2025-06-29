@@ -1,14 +1,22 @@
-# Core class the takes care of the matching between the computed
-# Node-Locations and the actual Node-Locations in the picture. Expands
-# upon the base class of Nodes.
+# -*- coding: utf-8 -*-
+"""
+# Matching Module:
+Core class the takes care of the matching between the computed\n
+Node-Locations and the actual Node-Locations in the picture.\n
+Expands upon the base class of Nodes.\n
+"""
+
+__copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
+
 
 # TODO: Expand this class into a strategy pattern in order to
 # test different matching strategies in order to improve results.
 
-from Components import VisualNode
-
 import itertools
+
 import numpy as np
+from components import VisualNode
+
 
 # Pubicliy accessable function that clients can use to find a matching. Gives access
 # to all the other functions and simplifys access by hiding all the conditional
@@ -19,15 +27,19 @@ import numpy as np
 # - image   = (list[VisualNodes]) list of nodes extracted from the image
 # - calc    = (list[VisualNodes]) list of nodes that were calculated
 # - returns = (list[(str,str)]) list of tuples that create the minimal Matching
-def find_best_matching(image: list[VisualNode], calc: list[VisualNode]) -> list[tuple[str, str]]:
+def find_best_matching(
+    image: list[VisualNode], calc: list[VisualNode]
+) -> list[tuple[str, str]]:
+    """give it two list of VisualNodes, lean back and enjoy so magic happening"""
     result: list[tuple[str, str]] = []
-    
+
     if len(image) != len(calc):
         result = _create_subset_for_matching(image, calc)
     else:
         eval, result = _calculate_best_matching(tuple(image), calc)
-    
+
     return result
+
 
 # Private function that does all the heavy lifting. Generates all possible
 # permutations between the two sets and returns the minimal matching. Does
@@ -43,21 +55,24 @@ def find_best_matching(image: list[VisualNode], calc: list[VisualNode]) -> list[
 # - returns  = (list[(str,str)]) list of tuples that create the minimal Matching
 # alternative:
 # - returns  = (float, list[str,str]) same as above but with the distance
-def _calculate_best_matching(image: tuple[VisualNode, ...], calc: list[VisualNode]) -> tuple[float, list[tuple[str, str]]]:
+def _calculate_best_matching(
+    image: tuple[VisualNode, ...], calc: list[VisualNode]
+) -> tuple[float, list[tuple[str, str]]]:
     if len(image) != len(calc):
         raise ValueError("Calculation Failed. The arrays don't have the same length.")
-    
+
     perms = list(itertools.permutations(image))
-    currentBest = float('inf')
+    current_best = float("inf")
     result: list[tuple[str, str]] = []
 
     for p in perms:
-        temp = _calculate_distance(p,calc)
-        if temp < currentBest:
-            currentBest = temp
-            result = _calculate_matching(p,calc)
+        temp = _calculate_distance(p, calc)
+        if temp < current_best:
+            current_best = temp
+            result = _calculate_matching(p, calc)
 
-    return (currentBest, result)
+    return (current_best, result)
+
 
 # Private function that is needed in cases the list do not have the same length.
 # Generates subsets on all the possible subsets and recursively checks them all.
@@ -66,7 +81,9 @@ def _calculate_best_matching(image: tuple[VisualNode, ...], calc: list[VisualNod
 # - image   = (list[VisualNodes]) list of nodes extracted from the image
 # - calc    = (list[VisualNodes]) list of nodes that were calculated
 # - returns = (list[str,str]) list of tuples that create the minimal Matching
-def _create_subset_for_matching(image: list[VisualNode], calc: list[VisualNode]) -> list[tuple[str, str]]:
+def _create_subset_for_matching(
+    image: list[VisualNode], calc: list[VisualNode]
+) -> list[tuple[str, str]]:
     len_image: int = len(image)
     len_calc: int = len(calc)
 
@@ -83,25 +100,28 @@ def _create_subset_for_matching(image: list[VisualNode], calc: list[VisualNode])
         fix = image
         overflow = calc
     else:
-        raise ValueError("Calculation went wrong. The arrays were already the same length"\
-                         +" and did not need to be turned into subsets.")
-    
-    currentBest = float('inf')
+        raise ValueError(
+            "Calculation went wrong. The arrays were already the same length"
+            + " and did not need to be turned into subsets."
+        )
+
+    current_best = float("inf")
     result: list[tuple[str, str]] = []
 
     # try every subset
     for c in comb:
-        tempDis, tempRes = _calculate_best_matching(c, fix)
-        if tempDis < currentBest:
-            currentBest = tempDis
-            result = tempRes
+        temp_dis, temp_res = _calculate_best_matching(c, fix)
+        if temp_dis < current_best:
+            current_best = temp_dis
+            result = temp_res
 
     # add all nodes as empty tuples that could not get a match
     for of in overflow:
-        if not any(of.getLabel() in tuple for tuple in result): 
-            result.append((of.getLabel(),""))
+        if not any(of.get_label in tuple for tuple in result):
+            result.append((of.get_label, ""))
 
     return result
+
 
 # Calculates the distance between each node in both arrays
 # - image   = Array of VisualNodes
@@ -110,23 +130,28 @@ def _create_subset_for_matching(image: list[VisualNode], calc: list[VisualNode])
 def _calculate_distance(image: tuple[VisualNode, ...], calc: list[VisualNode]) -> float:
     if len(image) != len(calc):
         raise ValueError("Calculation Failed. The arrays don't have the same length.")
-    
-    sum = 0.0
-    for i in range(len(image)):
-        sum += np.square(VisualNode.getDistance(image[i],calc[i]))
-    
-    return sum
+
+    value: float = 0.0
+    match: list[tuple[VisualNode, VisualNode]] = list(zip(image, calc))
+    for i, c in match:
+        value += np.square(i.get_distance(c))
+
+    return value
+
 
 # Generates a list (matching) of tuples for two arrays of nodes
 # - image   = Array of Nodes
 # - calc    = Array of Nodes
 # - returns = Array of Tuples
-def _calculate_matching(image: tuple[VisualNode, ...], calc: list[VisualNode]) -> list[tuple[str, str]]:
+def _calculate_matching(
+    image: tuple[VisualNode, ...], calc: list[VisualNode]
+) -> list[tuple[str, str]]:
     if len(image) != len(calc):
         raise ValueError("Calculation Failed. The arrays don't have the same length.")
-    
+
     result: list[tuple[str, str]] = []
-    for i in range(len(image)):
-        result.append((f"{image[i].getLabel()}", f"{calc[i].getLabel()}"))
+    match: list[tuple[VisualNode, VisualNode]] = list(zip(image, calc))
+    for i, c in match:
+        result.append((f"{i.get_label}", f"{c.get_label}"))
 
     return result

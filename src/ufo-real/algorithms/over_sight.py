@@ -7,17 +7,17 @@ __copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved.
 
 import asyncio
 
-from uart.receiver import UARTReceiver
-from uart.sender import UARTSender
+# newly added imports - subject to change
+from components import Camera, Edge, Graph, RealNode, RealNodeLabel, Robot
 from network.network import Network
 from network.node import Node, NodeLabel
+from uart.receiver import UARTReceiver
+from uart.sender import UARTSender
+from utilities.image_predictor import analyze_image
+from yolo_model_v11 import yolo_detect
+
 from .base_algorithm import BaseAlgorithm
 
-# newly added imports - subject to change
-from Components import Camera, Graph, RealNode, RealNodeLabel, Robot, Edge
-from math import atan2, degrees
-from YOLO_Model_v11 import yolo_detect
-from Utilities.ImagePredictor import analyze_image
 # TODO: allocate outside - from Utilities.alpha_image_recognition_adapter import run_image_recognition_async
 
 
@@ -30,11 +30,17 @@ class OverSightAlgorithm(BaseAlgorithm):
 
     # YOLO specific parameters
     # TODO: refactor, make dynamic, test best settings
-    _PATH_MODEL: str = "YOLO_Model_v11\\my_model.pt" # final
-    _PATH_SOURCE: str = "YOLO_Model_v11\\test_image2.jpg" # fake, change to picamera asap
-    _FRESHHOLD: float = 0.3 # test to see which one yields best result -> Range 0.3 to 1.0
-    _RESOLUTION: str = "1280x720" # final - could come from camere once its setup properly
-    _SAFE: bool = False # test
+    _PATH_MODEL: str = "YOLO_Model_v11\\my_model.pt"  # final
+    _PATH_SOURCE: str = (
+        "YOLO_Model_v11\\test_image2.jpg"  # fake, change to picamera asap
+    )
+    _FRESHHOLD: float = (
+        0.3  # test to see which one yields best result -> Range 0.3 to 1.0
+    )
+    _RESOLUTION: str = (
+        "1280x720"  # final - could come from camere once its setup properly
+    )
+    _SAFE: bool = False  # test
 
     def __init__(
         self,
@@ -121,7 +127,7 @@ class OverSightAlgorithm(BaseAlgorithm):
             return
         await self._ufo.follow_to_next_node()
         self._is_moving = True
-          
+
     @property
     def name(self) -> str:
         return "OverSight"
@@ -135,16 +141,20 @@ class OverSightAlgorithm(BaseAlgorithm):
             self._logger.warning("Cannot run sight: missing current or next node")
             return
 
-        # 2.) Pass these information down to the robot-class for the calculations 
-        self._ROBOT.change_position(self._convert_NetworkNode_to_GraphCoordinates(self._current_node))
-        self._ROBOT.turnTowards(self._convert_NetworkNode_to_GraphCoordinates(self._next_node))
+        # 2.) Pass these information down to the robot-class for the calculations
+        self._ROBOT.change_position(
+            self._convert_networknode_to_graphcoordinates(self._current_node)
+        )
+        self._ROBOT.turn_towards(
+            self._convert_networknode_to_graphcoordinates(self._next_node)
+        )
 
         # 3.) Trigger the image callculation and let it update the graph-object
         # TODO: create a temporary snapshot of the graph with this method for the next one
         await self.run_image_recognition_async()
 
         # 4. Transfer information in updated graph-object to network
-        self._apply_recognition_result_to_network() #TODO: add argument of current snapshot graph
+        self._apply_recognition_result_to_network()  # TODO: add argument of current snapshot graph
 
         # 5.) Trigger replanning
         self._recalculation_required = True
@@ -152,16 +162,30 @@ class OverSightAlgorithm(BaseAlgorithm):
 
     # <-- TODO: Helper-Methods that will need to be allocated somewhere else. -->
 
-    async def run_image_recognition_async(self) -> None: #Graph:
+    async def run_image_recognition_async(self) -> None:  # Graph:
         """
         Runs the YOLO image recognition pipeline asynchronously and returns
         an updated Graph with states for nodes and edges.
         """
         self._logger.debug("Taking picture now ...")
-        detected_nodes, detected_obstacles, frame = yolo_detect(self._PATH_MODEL, self._PATH_SOURCE, self._CAMERA, self._FRESHHOLD, self._RESOLUTION, self._SAFE) # type: ignore
+        detected_nodes, detected_obstacles, frame = yolo_detect(
+            self._PATH_MODEL,
+            self._PATH_SOURCE,
+            self._CAMERA,
+            self._FRESHHOLD,
+            self._RESOLUTION,
+            self._SAFE,
+        )  # type: ignore
         self._logger.debug("Evaluating picture ...")
-        analyze_image(self._CAMERA, self._ROBOT, self._GRAPH, detected_nodes, detected_obstacles, frame)
-    
+        analyze_image(
+            self._CAMERA,
+            self._ROBOT,
+            self._GRAPH,
+            detected_nodes,
+            detected_obstacles,
+            frame,
+        )
+
     def _apply_recognition_result_to_network(self) -> None:
         """
         Takes the result Graph from the image recognition and updates the
@@ -169,11 +193,15 @@ class OverSightAlgorithm(BaseAlgorithm):
         """
 
         # Update node states
-        for node in self._GRAPH.getNodes():
+        for node in self._GRAPH.get_nodes:
             try:
-                network_node = self._network.get_node_by_label(OverSightAlgorithm._str_to_NodeLabel(node.getLabel()))
+                network_node = self._network.get_node_by_label(
+                    OverSightAlgorithm._str_to_nodelabel(node.get_label)
+                )
             except Exception as e:
-                self._logger.warning(f"Node label {node.getLabel()} not found in network: {e}")
+                self._logger.warning(
+                    f"Node label {node.get_label} not found in network: {e}"
+                )
                 continue
 
             if node.state.name == "BLOCKED":
@@ -183,13 +211,15 @@ class OverSightAlgorithm(BaseAlgorithm):
             # else UNKNOWN = no change
 
         # Update edge states
-        for edge in self._GRAPH.getEdges():
-            node1_label = OverSightAlgorithm._str_to_NodeLabel(edge.start.getLabel())
-            node2_label = OverSightAlgorithm._str_to_NodeLabel(edge.end.getLabel())
+        for edge in self._GRAPH.get_edges:
+            node1_label = OverSightAlgorithm._str_to_nodelabel(edge.start.get_label)
+            node2_label = OverSightAlgorithm._str_to_nodelabel(edge.end.get_label)
             try:
                 network_edge = self._network.get_edge_by_label(node1_label, node2_label)
             except Exception as e:
-                self._logger.warning(f"Edge ({node1_label}, {node2_label}) not found in network: {e}")
+                self._logger.warning(
+                    f"Edge ({node1_label}, {node2_label}) not found in network: {e}"
+                )
                 continue
 
             if edge.status.name == "MISSING":
@@ -210,14 +240,14 @@ class OverSightAlgorithm(BaseAlgorithm):
         the robot.
         """
         # TODO: Change static setup of Graph, Robot and YOLO to be dynamic
-    
-        #-----------------SETUP-CAMERA-------------------#
-        self._CAMERA = Camera(1280,720,300,60,70)
 
-        #-----------------SETUP-ROBOT--------------------#
-        self._ROBOT = Robot(2250,3000,270)
+        # -----------------SETUP-CAMERA-------------------#
+        self._CAMERA = Camera(1280, 720, 300, 60, 70)
 
-        #-----------------SETUP-NETWORK------------------#   
+        # -----------------SETUP-ROBOT--------------------#
+        self._ROBOT = Robot(2250, 3000, 270)
+
+        # -----------------SETUP-NETWORK------------------#
         a = RealNode(RealNodeLabel.A, 1900, 2100)
         b = RealNode(RealNodeLabel.B, 2250, 2600)
         c = RealNode(RealNodeLabel.C, 2500, 2000)
@@ -226,25 +256,25 @@ class OverSightAlgorithm(BaseAlgorithm):
         z = RealNode(RealNodeLabel.Z, 3000, 2800)
         start = RealNode(RealNodeLabel.START, 2000, 3000)
 
-        ab = Edge(a,b)
-        bc = Edge(b,c)
-        bx = Edge(b,x)
-        by = Edge(b,y)
-        yz = Edge(y,z)
-        bs = Edge(b,start)
-            
-        nodes: list[RealNode] = [a,b,c,x,y,z,start]
+        ab = Edge(a, b)
+        bc = Edge(b, c)
+        bx = Edge(b, x)
+        by = Edge(b, y)
+        yz = Edge(y, z)
+        bs = Edge(b, start)
+
+        nodes: list[RealNode] = [a, b, c, x, y, z, start]
         edges: list[Edge] = [ab, bc, bx, by, yz, bs]
 
         self._GRAPH = Graph(nodes, edges)
 
     @staticmethod
-    def _str_to_NodeLabel(label: str) -> NodeLabel:
-        """ Adapter that turns a string into the matching NodeLabel. """
+    def _str_to_nodelabel(label: str) -> NodeLabel:
+        """Adapter that turns a string into the matching NodeLabel."""
         try:
             return NodeLabel(label)
         except ValueError:
             return NodeLabel.UNDEFINED
 
-    def _convert_NetworkNode_to_GraphCoordinates(self, node: Node) -> tuple[int, int]:
-        return self._GRAPH.get_node_by_str(node.label.value).get_coordinates()
+    def _convert_networknode_to_graphcoordinates(self, node: Node) -> tuple[int, int]:
+        return self._GRAPH.get_node_by_str(node.label.value).get_coordinates

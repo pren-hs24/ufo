@@ -3,11 +3,12 @@
 
 __copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved."
 
-from abc import ABC
 import logging
+from abc import ABC
 
-from network.node import Node
 from network.network import Network
+from network.node import Node
+
 from .ipathfinder import IPathfinder
 
 

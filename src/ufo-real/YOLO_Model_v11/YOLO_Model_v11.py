@@ -1,39 +1,50 @@
 # pyright: basic
+
+# -*- coding: utf-8 -*-
+"""
+YOLO Module:
+Imagerecognition aint pretty...
+"""
+
+import glob
 import os
 import sys
-import argparse
-import glob
 import time
+from array import *
+from typing import Optional
 
 import cv2
 import numpy as np
+from components import Camera, Obstacle, Pylon, VisualNode
 from ultralytics import YOLO
-from typing import Optional
-from array import *
-
-from Components import VisualNode, Pylon, Obstacle, Camera
-from uart.fake import picamera_import
 
 # Define and parse user input arguments
 
-#parser = argparse.ArgumentParser()
-#parser.add_argument('--model', help='Path to YOLO model file (example: "runs/detect/train/weights/best.pt")',
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--model', help='Path to YOLO model file (example: "runs/detect/train/weights/best.pt")',
 #                    required=True)
-#parser.add_argument('--source', help='Image source, can be image file ("test.jpg"), \
-#                    image folder ("test_dir"), video file ("testvid.mp4"), index of USB camera ("usb0"), or index of Picamera ("picamera0")', 
+# parser.add_argument('--source', help='Image source, can be image file ("test.jpg"), \
+#                    image folder ("test_dir"), video file ("testvid.mp4"), index of USB camera ("usb0"), or index of Picamera ("picamera0")',
 #                    required=True)
-#parser.add_argument('--thresh', help='Minimum confidence threshold for displaying detected objects (example: "0.4")',
+# parser.add_argument('--thresh', help='Minimum confidence threshold for displaying detected objects (example: "0.4")',
 #                    default=0.5)
-#parser.add_argument('--resolution', help='Resolution in WxH to display inference results at (example: "640x480"), \
+# parser.add_argument('--resolution', help='Resolution in WxH to display inference results at (example: "640x480"), \
 #                    otherwise, match source resolution',
 #                    default=None)
-#parser.add_argument('--record', help='Record results from video or webcam and save it as "demo1.avi". Must specify --resolution argument to record.',
+# parser.add_argument('--record', help='Record results from video or webcam and save it as "demo1.avi". Must specify --resolution argument to record.',
 #                    action='store_true')
-#args = parser.parse_args()
+# args = parser.parse_args()
 
 
-def yolo_detect(model_path: str, source: str,  camera: Camera, thresh: Optional[float] = 0.4, resolution: Optional[str] = None, record: Optional[bool]=False):
-
+def yolo_detect(
+    model_path: str,
+    source: str,
+    camera: Camera,
+    thresh: Optional[float] = 0.4,
+    resolution: Optional[str] = None,
+    record: Optional[bool] = False,
+):
+    """The Imagerecognition"""
     # Parse user inputs
     img_source = source
     min_thresh = thresh
@@ -41,89 +52,114 @@ def yolo_detect(model_path: str, source: str,  camera: Camera, thresh: Optional[
     record = record
 
     # Check if model file exists and is valid
-    if (not os.path.exists(model_path)):
-        print('ERROR: Model path is invalid or model was not found. Make sure the model filename was entered correctly.')
+    if not os.path.exists(model_path):
+        print(
+            "ERROR: Model path is invalid or model was not found. Make sure the model filename was entered correctly."
+        )
         sys.exit(0)
 
     # Load the model into memory and get labemap
-    model = YOLO(model_path, task='detect')
+    model = YOLO(model_path, task="detect")
     labels = model.names
 
     # Parse input to determine if image source is a file, folder, video, or USB camera
-    img_ext_list = ['.jpg','.JPG','.jpeg','.JPEG','.png','.PNG','.bmp','.BMP']
-    vid_ext_list = ['.avi','.mov','.mp4','.mkv','.wmv']
+    img_ext_list = [".jpg", ".JPG", ".jpeg", ".JPEG", ".png", ".PNG", ".bmp", ".BMP"]
+    vid_ext_list = [".avi", ".mov", ".mp4", ".mkv", ".wmv"]
 
     if os.path.isdir(img_source):
-        source_type = 'folder'
+        source_type = "folder"
     elif os.path.isfile(img_source):
         _, ext = os.path.splitext(img_source)
         if ext in img_ext_list:
-            source_type = 'image'
+            source_type = "image"
         elif ext in vid_ext_list:
-            source_type = 'video'
+            source_type = "video"
         else:
-            print(f'File extension {ext} is not supported.')
+            print(f"File extension {ext} is not supported.")
             sys.exit(0)
-    elif 'usb' in img_source:
-        source_type = 'usb'
+    elif "usb" in img_source:
+        source_type = "usb"
         usb_idx = int(img_source[3:])
-    elif 'picamera' in img_source:
-        source_type = 'picamera'
+    elif "picamera" in img_source:
+        source_type = "picamera"
         picam_idx = int(img_source[8:])
     else:
-        print(f'Input {img_source} is invalid. Please try again.')
+        print(f"Input {img_source} is invalid. Please try again.")
         sys.exit(0)
 
     # Parse user-specified display resolution
     resize = False
     if user_res:
         resize = True
-        resW, resH = int(user_res.split('x')[0]), int(user_res.split('x')[1])
+        resW, resH = int(user_res.split("x")[0]), int(user_res.split("x")[1])
 
     # Check if recording is valid and set up recording
     if record:
-        if source_type not in ['video','usb']:
-            print('Recording only works for video and camera sources. Please try again.')
+        if source_type not in ["video", "usb"]:
+            print(
+                "Recording only works for video and camera sources. Please try again."
+            )
             sys.exit(0)
         if not user_res:
-            print('Please specify resolution to record video at.')
+            print("Please specify resolution to record video at.")
             sys.exit(0)
-        
+
         # Set up recording
-        record_name = 'demo1.avi'
+        record_name = "demo1.avi"
         record_fps = 30
-        recorder = cv2.VideoWriter(record_name, cv2.VideoWriter_fourcc(*'MJPG'), record_fps, (resW,resH)) # type: ignore
+        recorder = cv2.VideoWriter(  # pylint: disable=no-member
+            record_name,
+            cv2.VideoWriter_fourcc(*"MJPG"),  # pylint: disable=no-member
+            record_fps,
+            (resW, resH),
+        )  # type: ignore
 
     # Load or initialize image source
-    if source_type == 'image':
+    if source_type == "image":
         imgs_list = [img_source]
-    elif source_type == 'folder':
+    elif source_type == "folder":
         imgs_list = []
-        filelist = glob.glob(img_source + '/*')
+        filelist = glob.glob(img_source + "/*")
         for file in filelist:
             _, file_ext = os.path.splitext(file)
             if file_ext in img_ext_list:
                 imgs_list.append(file)
-    elif source_type == 'video' or source_type == 'usb':
-
-        if source_type == 'video': cap_arg = img_source
-        elif source_type == 'usb': cap_arg = usb_idx
-        cap = cv2.VideoCapture(cap_arg)
+    elif source_type == "video" or source_type == "usb":
+        if source_type == "video":
+            cap_arg = img_source
+        elif source_type == "usb":
+            cap_arg = usb_idx
+        cap = cv2.VideoCapture(cap_arg)  # pylint: disable=no-member
 
         # Set camera or video resolution if specified by user
         if user_res:
             ret = cap.set(3, resW)
             ret = cap.set(4, resH)
 
-    elif source_type == 'picamera':
-        from picamera2 import Picamera2 # type: ignore
+    elif source_type == "picamera":
+        from picamera2 import Picamera2  # type: ignore
+
         cap = Picamera2()
-        cap.configure(cap.create_video_configuration(main={"format": 'RGB888', "size": (resW, resH)}))
+        cap.configure(
+            cap.create_video_configuration(
+                main={"format": "RGB888", "size": (resW, resH)}
+            )
+        )
         cap.start()
 
     # Set bounding box colors (using the Tableu 10 color scheme)
-    bbox_colors = [(164,120,87), (68,148,228), (93,97,209), (178,182,133), (88,159,106), 
-                (96,202,231), (159,124,168), (169,162,241), (98,118,150), (172,176,184)]
+    bbox_colors = [
+        (164, 120, 87),
+        (68, 148, 228),
+        (93, 97, 209),
+        (178, 182, 133),
+        (88, 159, 106),
+        (96, 202, 231),
+        (159, 124, 168),
+        (169, 162, 241),
+        (98, 118, 150),
+        (172, 176, 184),
+    ]
 
     # Initialize control and status variables
     avg_frame_rate = 0
@@ -133,39 +169,48 @@ def yolo_detect(model_path: str, source: str,  camera: Camera, thresh: Optional[
 
     # Begin inference loop
     while True:
-
         t_start = time.perf_counter()
 
         # Load frame from image source
-        if source_type == 'image' or source_type == 'folder': # If source is image or image folder, load the image using its filename
+        if (
+            source_type == "image" or source_type == "folder"
+        ):  # If source is image or image folder, load the image using its filename
             if img_count >= len(imgs_list):
-                print('All images have been processed. Exiting program.')
+                print("All images have been processed. Exiting program.")
                 sys.exit(0)
             img_filename = imgs_list[img_count]
-            frame = cv2.imread(img_filename)
+            frame = cv2.imread(img_filename)  # pylint: disable=no-member
             img_count = img_count + 1
-        
-        elif source_type == 'video': # If source is a video, load next frame from video file
+
+        elif (
+            source_type == "video"
+        ):  # If source is a video, load next frame from video file
             ret, frame = cap.read()
             if not ret:
-                print('Reached end of the video file. Exiting program.')
-                break
-        
-        elif source_type == 'usb': # If source is a USB camera, grab frame from camera
-            ret, frame = cap.read()
-            if (frame is None) or (not ret):
-                print('Unable to read frames from the camera. This indicates the camera is disconnected or not working. Exiting program.')
+                print("Reached end of the video file. Exiting program.")
                 break
 
-        elif source_type == 'picamera': # If source is a Picamera, grab frames using picamera interface
-            frame = cap.capture_array() # type: ignore
-            if (frame is None):
-                print('Unable to read frames from the Picamera. This indicates the camera is disconnected or not working. Exiting program.')
+        elif source_type == "usb":  # If source is a USB camera, grab frame from camera
+            ret, frame = cap.read()
+            if (frame is None) or (not ret):
+                print(
+                    "Unable to read frames from the camera. This indicates the camera is disconnected or not working. Exiting program."
+                )
+                break
+
+        elif (
+            source_type == "picamera"
+        ):  # If source is a Picamera, grab frames using picamera interface
+            frame = cap.capture_array()  # type: ignore
+            if frame is None:
+                print(
+                    "Unable to read frames from the Picamera. This indicates the camera is disconnected or not working. Exiting program."
+                )
                 break
 
         # Resize frame to desired display resolution
         if resize == True:
-            frame = cv2.resize(frame,(resW,resH))
+            frame = cv2.resize(frame, (resW, resH))  # pylint: disable=no-member
 
         # Run inference on frame
         results = model(frame, verbose=False)
@@ -183,27 +228,32 @@ def yolo_detect(model_path: str, source: str,  camera: Camera, thresh: Optional[
 
         # Go through each detection and get bbox coords, confidence, and class
         for i in range(len(detections)):
-
             # Get bounding box coordinates
             # Ultralytics returns results in Tensor format, which have to be converted to a regular Python array
-            xyxy_tensor = detections[i].xyxy.cpu() # Detections in Tensor format in CPU memory
-            xyxy = xyxy_tensor.numpy().squeeze() # Convert tensors to Numpy array
-            xmin, ymin, xmax, ymax = xyxy.astype(int) # Extract individual coordinates and convert to int
+            xyxy_tensor = detections[
+                i
+            ].xyxy.cpu()  # Detections in Tensor format in CPU memory
+            xyxy = xyxy_tensor.numpy().squeeze()  # Convert tensors to Numpy array
+            xmin, ymin, xmax, ymax = xyxy.astype(
+                int
+            )  # Extract individual coordinates and convert to int
 
             # Get bounding box class ID and name
             classidx = int(detections[i].cls.item())
             classname = labels[classidx]
 
-            #SELF ADDED CODE
-            if classname == 'nodes':
-                center_width = int((xmin + xmax)/2)
-                center_height = int((ymin + ymax)/2)
-                nodes.append(VisualNode.position_only(str(i),center_width,center_height))
+            # SELF ADDED CODE
+            if classname == "nodes":
+                center_width = int((xmin + xmax) / 2)
+                center_height = int((ymin + ymax) / 2)
+                nodes.append(
+                    VisualNode.position_only(str(i), center_width, center_height)
+                )
 
-            if classname == 'pylon':
+            if classname == "pylon":
                 pylons.append(Pylon(xmin, ymin, xmax, ymax))
 
-            if classname == 'obstacle':
+            if classname == "obstacle":
                 obstacles.append(Obstacle(xmin, ymin, xmax, ymax))
 
             # Get bounding box confidence
@@ -211,15 +261,35 @@ def yolo_detect(model_path: str, source: str,  camera: Camera, thresh: Optional[
 
             # Draw box if confidence threshold is high enough
             if conf > min_thresh:
-
                 color = bbox_colors[classidx % 10]
-                cv2.rectangle(frame, (xmin,ymin), (xmax,ymax), color, 2)
+                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)  # pylint: disable=no-member
 
-                label = f'{classname}: {int(conf*100)}%'
-                labelSize, baseLine = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1) # Get font size
-                label_ymin = max(ymin, labelSize[1] + 10) # Make sure not to draw label too close to top of window
-                cv2.rectangle(frame, (xmin, label_ymin-labelSize[1]-10), (xmin+labelSize[0], label_ymin+baseLine-10), color, cv2.FILLED) # Draw white box to put label text in
-                cv2.putText(frame, label, (xmin, label_ymin-7), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1) # Draw label text
+                label = f"{classname}: {int(conf * 100)}%"
+                labelSize, baseLine = cv2.getTextSize(  # pylint: disable=no-member
+                    label,
+                    cv2.FONT_HERSHEY_SIMPLEX,  # pylint: disable=no-member
+                    0.5,
+                    1,  # pylint: disable=no-member
+                )  # Get font size
+                label_ymin = max(
+                    ymin, labelSize[1] + 10
+                )  # Make sure not to draw label too close to top of window
+                cv2.rectangle(  # pylint: disable=no-member
+                    frame,
+                    (xmin, label_ymin - labelSize[1] - 10),
+                    (xmin + labelSize[0], label_ymin + baseLine - 10),
+                    color,
+                    cv2.FILLED,  # pylint: disable=no-member
+                )  # Draw white box to put label text in
+                cv2.putText(  # pylint: disable=no-member
+                    frame,
+                    label,
+                    (xmin, label_ymin - 7),
+                    cv2.FONT_HERSHEY_SIMPLEX,  # pylint: disable=no-member
+                    0.5,
+                    (0, 0, 0),
+                    1,
+                )  # Draw label text
 
                 # Basic example: count the number of objects in the image
                 object_count = object_count + 1
@@ -229,31 +299,44 @@ def yolo_detect(model_path: str, source: str,  camera: Camera, thresh: Optional[
             nodes.append(camera.compute_hidden_node_image_position(p))
 
         # Calculate and draw framerate (if using video, USB, or Picamera source)
-        if source_type == 'video' or source_type == 'usb' or source_type == 'picamera':
-            cv2.putText(frame, f'FPS: {avg_frame_rate:0.2f}', (10,20), cv2.FONT_HERSHEY_SIMPLEX, .7, (0,255,255), 2) # Draw framerate
-        
-        # Display detection results
-        #cv2.putText(frame, f'Number of objects: {object_count}', (10,40), cv2.FONT_HERSHEY_SIMPLEX, .7, (0,255,255), 2) # Draw total number of detected objects
-        #cv2.imshow('YOLO detection results',frame) # Display image
+        if source_type == "video" or source_type == "usb" or source_type == "picamera":
+            cv2.putText(  # pylint: disable=no-member
+                frame,
+                f"FPS: {avg_frame_rate:0.2f}",
+                (10, 20),
+                cv2.FONT_HERSHEY_SIMPLEX,  # pylint: disable=no-member
+                0.7,
+                (0, 255, 255),
+                2,
+            )  # Draw framerate
 
-        if record: recorder.write(frame)
+        # Display detection results
+        # cv2.putText(frame, f'Number of objects: {object_count}', (10,40), cv2.FONT_HERSHEY_SIMPLEX, .7, (0,255,255), 2) # Draw total number of detected objects
+        # cv2.imshow('YOLO detection results',frame) # Display image
+
+        if record:
+            recorder.write(frame)
 
         # If inferencing on individual images, wait for user keypress before moving to next image. Otherwise, wait 5ms before moving to next frame.
-        if source_type == 'image' or source_type == 'folder':
-            key = cv2.waitKey()
-        elif source_type == 'video' or source_type == 'usb' or source_type == 'picamera':
-            key = cv2.waitKey(5)
-        
-        if key == ord('q') or key == ord('Q'): # Press 'q' to quit
+        if source_type == "image" or source_type == "folder":
+            key = cv2.waitKey()  # pylint: disable=no-member
+        elif (
+            source_type == "video" or source_type == "usb" or source_type == "picamera"
+        ):
+            key = cv2.waitKey(5)  # pylint: disable=no-member
+
+        if key == ord("q") or key == ord("Q"):  # Press 'q' to quit
             break
-        elif key == ord('s') or key == ord('S'): # Press 's' to pause inference
-            cv2.waitKey()
-        elif key == ord('p') or key == ord('P'): # Press 'p' to save a picture of results on this frame
-            cv2.imwrite('capture.png',frame)
-        
+        elif key == ord("s") or key == ord("S"):  # Press 's' to pause inference
+            cv2.waitKey()  # pylint: disable=no-member
+        elif key == ord("p") or key == ord(
+            "P"
+        ):  # Press 'p' to save a picture of results on this frame
+            cv2.imwrite("capture.png", frame)  # pylint: disable=no-member
+
         # Calculate FPS for this frame
         t_stop = time.perf_counter()
-        frame_rate_calc = float(1/(t_stop - t_start))
+        frame_rate_calc = float(1 / (t_stop - t_start))
 
         # Append FPS result to frame_rate_buffer (for finding average FPS over multiple frames)
         if len(frame_rate_buffer) >= fps_avg_len:
@@ -265,14 +348,14 @@ def yolo_detect(model_path: str, source: str,  camera: Camera, thresh: Optional[
         # Calculate average FPS for past frames
         avg_frame_rate = np.mean(frame_rate_buffer)
 
-
         # Clean up
-        print(f'Average pipeline FPS: {avg_frame_rate:.2f}')
-        if source_type == 'video' or source_type == 'usb':
+        print(f"Average pipeline FPS: {avg_frame_rate:.2f}")
+        if source_type == "video" or source_type == "usb":
             cap.release()
-        elif source_type == 'picamera':
-            cap.stop() # type: ignore
-        if record: recorder.release()
-        #cv2.destroyAllWindows()
+        elif source_type == "picamera":
+            cap.stop()  # type: ignore
+        if record:
+            recorder.release()
+        # cv2.destroyAllWindows()
 
         return (nodes, obstacles, frame)
