@@ -11,3 +11,8 @@ dependencies = [
     "scipy==1.15.2",
     "uvloop==0.21.0",
 ]
+
+[mypy-tool]
+mypy-path = "src/ufo-real/stub"
+ignore-missing-imports = false
+strict = true
