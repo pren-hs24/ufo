@@ -4,3 +4,4 @@ pyserial-asyncio==0.6
 aiohttp==3.11.14
 pyaddict==1.2.1
 opencv-python==4.11.0.86
+ultralytics==8.3.161
