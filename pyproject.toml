@@ -11,3 +11,7 @@ dependencies = [
     "scipy==1.15.2",
     "uvloop==0.21.0",
 ]
+
+[tool.mypy]
+mypy_path = "src/ufo-real/uart/stub"
+strict = true

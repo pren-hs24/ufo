@@ -11,7 +11,7 @@ from typing import Awaitable, Callable, cast
 
 import uvloop
 from aiohttp import web
-from serial_asyncio import open_serial_connection  # type: ignore
+from serial_asyncio import open_serial_connection
 
 from common.application import log_configuration
 from common.competition import create_dynamic_network
