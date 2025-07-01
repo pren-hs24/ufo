@@ -12,6 +12,7 @@ dependencies = [
     "uvloop==0.21.0",
 ]
 
-[tool.mypy]
-mypy_path = "src/ufo-real/uart/stub"
+[mypy-tool]
+mypy-path = "src/ufo-real/stub"
+ignore-missing-imports = false
 strict = true

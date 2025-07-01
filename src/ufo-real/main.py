@@ -9,8 +9,7 @@ import asyncio
 from argparse import ArgumentParser, Namespace
 from typing import Awaitable, Callable, cast
 
-import uvloop
-from aiohttp import web
+import uvloop  # pylint: disable=import-error
 from serial_asyncio import open_serial_connection
 
 from common.application import log_configuration
@@ -104,8 +103,8 @@ async def demo(engine: Engine, args: Namespace, logger: logging.Logger) -> None:
 
 def _on_startup(
     engine: Engine, args: Namespace, logger: logging.Logger
-) -> Callable[[web.Application], Awaitable[None]]:
-    async def _impl(_: web.Application) -> None:
+) -> Callable[[web.Application], Awaitable[None]]:  # type: ignore # noqa: F821 # pylint: disable=undefined-variable
+    async def _impl(_: web.Application) -> None:  # type: ignore # noqa: F821 # pylint: disable=undefined-variable
         """Startup handler."""
 
         if args.demo:
@@ -126,7 +125,7 @@ def main() -> None:
     logger.info("[main]")
     args = _get_args(logger)
 
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())  # type: ignore
 
     engine = Engine(create_dynamic_network)
     server = WebServer(engine)
