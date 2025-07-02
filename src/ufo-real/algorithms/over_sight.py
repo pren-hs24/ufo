@@ -182,7 +182,6 @@ class OverSightAlgorithm(RoadSenseAlgorithm):
     def _convert_networknode_to_graphcoordinates(self, node: Node) -> tuple[int, int]:
         return self.graph.get_node_by_str(node.label.value).get_coordinates
 
-
 def _setup_graph() -> Graph:  # pylint: disable=too-many-locals
     """--------------SETUP-NETWORK------------------"""
     a = RealNode(RealNodeLabel.A, 2933, 900)
@@ -209,4 +208,6 @@ def _setup_graph() -> Graph:  # pylint: disable=too-many-locals
     nodes: list[RealNode] = [a, b, c, x, y, z, start]
     edges: list[Edge] = [ab, ay, az, bc, by, cw, wx, ws, xy, xz, xs]
 
+
     return Graph(nodes, edges)
+  

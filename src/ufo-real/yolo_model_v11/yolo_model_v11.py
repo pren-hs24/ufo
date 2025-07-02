@@ -63,6 +63,7 @@ class ImageDetection:
         if not os.path.exists(model_path):
             model_path = "yolo_model_v11\\my_model.pt"  # default in case of misspelling
 
+
         # Load the model into memory (takes time) and get label-map
         self.model = YOLO(model_path, task="detect")
         self.labels = self.model.names
@@ -77,7 +78,7 @@ class ImageDetection:
             + f"- Labels:\t{self.labels}\n"
         )
 
-    def yolo_detect_by_image(  # pylint: disable=too-many-locals
+    def yolo_detect_by_image( # pylint: disable=too-many-locals
         self,
         pic_path: str,
     ) -> tuple[list[VisualNode], list[Obstacle], cv2.typing.MatLike]:
@@ -94,7 +95,7 @@ class ImageDetection:
             sys.exit(0)
 
         frame = cv2.imread(pic_path)  # pylint: disable=no-member
-        frame = cv2.resize(frame, self.resolution)  # pylint: disable=no-member
+        frame = cv2.resize(frame, self.resolution) # pylint: disable=no-member
 
         # Run inference on frame
         results = self.model(frame, verbose=False)
