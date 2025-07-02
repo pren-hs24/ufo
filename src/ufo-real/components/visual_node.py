@@ -15,6 +15,8 @@ from typing import Self
 class VisualNode:
     """VisualNode containing all the information about an object in an image."""
 
+    unique_id: int = 0
+
     pos_x: int
     pos_y: int
     width: int
@@ -33,11 +35,19 @@ class VisualNode:
         self.pos_y = point[1]
         self.width = width
         self.height = height
+        VisualNode.unique_id += 1
 
     @classmethod
-    def position_only(cls, label: str, point: tuple[int, int]) -> "VisualNode":
+    def position_only_and_label(
+        cls, label: str, point: tuple[int, int]
+    ) -> "VisualNode":
         """a simplyfied constructor for the busy amoung us"""
         return cls(label, point, 1, 1)
+
+    @classmethod
+    def position_only(cls, point: tuple[int, int]) -> "VisualNode":
+        """even further simplyfied constructor for minimalists"""
+        return cls(str(VisualNode.unique_id), point, 0, 0)
 
     def __str__(self) -> str:
         return f"VisualNode: {self.label}({self.width}px,{self.height}px)"

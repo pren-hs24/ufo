@@ -60,9 +60,11 @@ class ImageDetection:
             self.resolution = (camera.get_width, camera.get_height)
 
         # Check if model file exists and is valid
-        if not os.path.exists(model_path):
-            model_path = "yolo_model_v11\\my_model.pt"  # default in case of misspelling
-
+        if not os.path.isfile(model_path):
+            model_path = os.path.join(
+                os.getcwd(), "src", "ufo-real", "yolo_model_v11", "my_model.pt"
+            )
+            print(model_path)
 
         # Load the model into memory (takes time) and get label-map
         self.model = YOLO(model_path, task="detect")
@@ -78,14 +80,14 @@ class ImageDetection:
             + f"- Labels:\t{self.labels}\n"
         )
 
-    def yolo_detect_by_image( # pylint: disable=too-many-locals
+    def yolo_detect_by_image(  # pylint: disable=too-many-locals
         self,
         pic_path: str,
     ) -> tuple[list[VisualNode], list[Obstacle], cv2.typing.MatLike]:
         """let the system recognize all the objects in a given picture"""
 
         # check to see if the pic_path is usable
-        if os.path.isfile(pic_path):
+        if os.path.exists(pic_path):
             _, ext = os.path.splitext(pic_path)
             if ext not in self.img_ext_list:
                 print(f"File extension {ext} is not supported.")
@@ -95,7 +97,7 @@ class ImageDetection:
             sys.exit(0)
 
         frame = cv2.imread(pic_path)  # pylint: disable=no-member
-        frame = cv2.resize(frame, self.resolution) # pylint: disable=no-member
+        frame = cv2.resize(frame, self.resolution)  # pylint: disable=no-member
 
         # Run inference on frame
         results = self.model(frame, verbose=False)
@@ -113,18 +115,16 @@ class ImageDetection:
             # Get bounding box coordinates
             # Ultralytics returns results in Tensor format, which have to be
             # converted to a regular Python array
-            xyxy_tensor = detections[
-                d
-            ].xyxy.cpu()  # Detections in Tensor format in CPU memory
+            xyxy_tensor = d.xyxy.cpu()  # Detections in Tensor format in CPU memory
             xyxy = xyxy_tensor.numpy().squeeze()  # Convert tensors to Numpy array
             xmin, ymin, xmax, ymax = xyxy.astype(
                 int
             )  # Extract individual coordinates and convert to int
 
             # Get bounding box class ID, name and confidence
-            classidx = int(detections[d].cls.item())
+            classidx = int(d.cls.item())
             classname = self.labels[classidx]
-            conf = detections[d].conf.item()
+            conf = d.conf.item()
 
             # Draw box if confidence threshold is high enough
             if conf > self.thresh:
@@ -133,7 +133,7 @@ class ImageDetection:
                     center_width = int((xmin + xmax) / 2)
                     center_height = int((ymin + ymax) / 2)
                     nodes.append(
-                        VisualNode.position_only(str(d), (center_width, center_height))
+                        VisualNode.position_only((center_width, center_height))
                     )
                 elif classname == "pylon":
                     pylons.append(Pylon(xmin, ymin, xmax, ymax))
