@@ -7,6 +7,7 @@ __copyright__ = "Copyright (c) 2025 HSLU PREN Team 2, FS25. All rights reserved.
 import copy
 import os
 
+
 from components import RealNode, RealNodeLabel, Edge, Graph, Robot, Camera
 from utilities import ImageSynthesizer
 from yolo_model_v11 import ImageDetection
@@ -15,6 +16,7 @@ from yolo_model_v11 import ImageDetection
 # alpha_image_recognition_test1
 def test_image_recognition_one() -> None:
     """Test image recognition with a single image and basic setup."""
+
 
     camera = _setup_camera()
     robot = _setup_robot()
@@ -36,6 +38,7 @@ def test_image_recognition_one() -> None:
     synthesizer.update_graph_by_objects(detected_nodes, detected_obstacles)
 
     assert graph_is == graph_should
+
     message: str = "Image-Test 1 Successful"
     if graph_is != graph_should:
         message = "Image-Test 1 Failed"
@@ -55,6 +58,7 @@ def _setup_camera() -> Camera:
 
 def _setup_graph() -> Graph:
     """--------------SETUP-NETWORK------------------"""
+
     a = RealNode(RealNodeLabel.A, 1900, 2100)
     b = RealNode(RealNodeLabel.B, 2250, 2600)
     c = RealNode(RealNodeLabel.C, 2500, 2000)
