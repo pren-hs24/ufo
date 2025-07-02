@@ -208,6 +208,4 @@ def _setup_graph() -> Graph:  # pylint: disable=too-many-locals
     nodes: list[RealNode] = [a, b, c, x, y, z, start]
     edges: list[Edge] = [ab, ay, az, bc, by, cw, wx, ws, xy, xz, xs]
 
-
     return Graph(nodes, edges)
-  
