@@ -182,25 +182,30 @@ class OverSightAlgorithm(RoadSenseAlgorithm):
     def _convert_networknode_to_graphcoordinates(self, node: Node) -> tuple[int, int]:
         return self.graph.get_node_by_str(node.label.value).get_coordinates
 
-
-def _setup_graph() -> Graph:
+def _setup_graph() -> Graph:  # pylint: disable=too-many-locals
     """--------------SETUP-NETWORK------------------"""
-    a = RealNode(RealNodeLabel.A, 1900, 2100)
-    b = RealNode(RealNodeLabel.B, 2250, 2600)
-    c = RealNode(RealNodeLabel.C, 2500, 2000)
-    x = RealNode(RealNodeLabel.X, 3000, 2400)
-    y = RealNode(RealNodeLabel.Y, 2300, 2700)
-    z = RealNode(RealNodeLabel.Z, 3000, 2800)
-    start = RealNode(RealNodeLabel.START, 2000, 3000)
+    a = RealNode(RealNodeLabel.A, 2933, 900)
+    b = RealNode(RealNodeLabel.B, 1586, 250)
+    c = RealNode(RealNodeLabel.C, 487, 666)
+    x = RealNode(RealNodeLabel.X, 2020, 2700)
+    y = RealNode(RealNodeLabel.Y, 1692, 1500)
+    z = RealNode(RealNodeLabel.Z, 3150, 2650)
+    w = RealNode(RealNodeLabel.W, 500, 2150)
+    start = RealNode(RealNodeLabel.START, 1800, 5100)
 
     ab = Edge(a, b)
+    ay = Edge(a, y)
+    az = Edge(a, z)
     bc = Edge(b, c)
-    bx = Edge(b, x)
     by = Edge(b, y)
-    yz = Edge(y, z)
-    bs = Edge(b, start)
+    cw = Edge(c, w)
+    wx = Edge(w, x)
+    ws = Edge(w, start)
+    xy = Edge(x, y)
+    xz = Edge(x, z)
+    xs = Edge(x, start)
 
     nodes: list[RealNode] = [a, b, c, x, y, z, start]
-    edges: list[Edge] = [ab, bc, bx, by, yz, bs]
+    edges: list[Edge] = [ab, ay, az, bc, by, cw, wx, ws, xy, xz, xs]
 
     return Graph(nodes, edges)

@@ -100,6 +100,25 @@ class Graph:
                 return node
         raise ValueError(f"{name} not found")
 
+    def get_edge_by_str_tupel(self, name: tuple[str, str]) -> Edge:
+        """
+        Looks at all the edges in the graph and returns the first\n
+        ``Edge`` matching with the given ``String``. Will raise\n
+        ``ValueError`` if there is no matching edge.
+        """
+        label_a, label_b = name
+        edges: list[Edge] = self.arr_edges
+        for edge in edges:
+            node_a, node_b = edge.get_nodes
+            if (
+                label_a == node_a.get_label
+                and label_b == node_b.get_label
+                or label_b == node_a.get_label
+                and label_a == node_b.get_label
+            ):
+                return edge
+        raise ValueError(f"{name} not found")
+
     @property
     def get_edges(self) -> list[Edge]:
         """returns a list of the edges"""

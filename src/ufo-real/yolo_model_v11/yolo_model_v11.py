@@ -61,7 +61,8 @@ class ImageDetection:
 
         # Check if model file exists and is valid
         if not os.path.exists(model_path):
-            model_path = "YOLO_Model_v11\\my_model.pt"  # default in case of misspelling
+            model_path = "yolo_model_v11\\my_model.pt"  # default in case of misspelling
+
 
         # Load the model into memory (takes time) and get label-map
         self.model = YOLO(model_path, task="detect")
