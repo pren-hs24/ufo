@@ -97,7 +97,7 @@ class ImageSynthesizer:
                 else:
                     _find_node_by_str(self.graph.get_nodes, n).is_available()
 
-                result.append(VisualNode.position_only(n, (ms_x, ms_y)))
+                result.append(VisualNode.position_only_and_label(n, (ms_x, ms_y)))
             elif (
                 not n == "" and n in computed_nodes and m == ""
             ):  # missed a node that got computed but not found in the image
@@ -106,7 +106,7 @@ class ImageSynthesizer:
                 ms_x = cp_x + offset_x
                 ms_y = cp_y + offset_y
 
-                result.append(VisualNode.position_only(n, (ms_x, ms_y)))
+                result.append(VisualNode.position_only_and_label(n, (ms_x, ms_y)))
 
         return (result, pylons)
 
